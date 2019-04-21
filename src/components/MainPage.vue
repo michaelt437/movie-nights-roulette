@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <h1 class="text-center">Movie Nights Roulette</h1>
-    <div class="flex flex-row justify-center pt-10">
+    <div class="flex flex-row items-start justify-center pt-10">
       <User
         v-for="user in usersArr"
         :key="user"

@@ -20,3 +20,24 @@ h1 {
 .user-stack, .add-btn {
   flex-basis: 300px;
 }
+
+.user-stack:nth-of-type(1) {
+  .user-stack--entry {
+    box-shadow: inset 3px 0 #F66D9B;
+  }
+}
+.user-stack:nth-of-type(2) {
+  .user-stack--entry {
+    box-shadow: inset 3px 0 #4DC0B5;
+  }
+}
+.user-stack:nth-of-type(3) {
+  .user-stack--entry {
+    box-shadow: inset 3px 0 #FFED4A;
+  }
+}
+.user-stack:nth-of-type(4) {
+  .user-stack--entry {
+    box-shadow: inset 3px 0 #9561E2;
+  }
+}
