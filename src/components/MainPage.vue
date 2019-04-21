@@ -2,7 +2,11 @@
   <div class="container">
     <h1 class="text-center">Movie Nights Roulette</h1>
     <div class="flex flex-row justify-center pt-10">
-      <User v-if="users.length"></User>
+      <User
+        v-for="user in usersArr"
+        :key="user"
+        :user="user"
+        ></User>
       <AddUser></AddUser>
     </div>
   </div>
@@ -20,9 +24,7 @@ export default {
   },
   data() {
     return {
-      document: [],
-      collection: 'michael',
-      users: []
+      usersArr: []
     }
   },
   methods: {
@@ -40,10 +42,10 @@ export default {
   },
   created() {
     db.collection("users").doc("names")
-    .onSnapshot(function(doc) {
-        console.log("Current data: ", doc.data());
-
-    });
+    .onSnapshot((doc) => {
+        if(doc.data()) this.usersArr = Object.values(doc.data())
+        console.log(this.usersArr)
+    })
   }
 }
 </script>

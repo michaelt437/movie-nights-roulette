@@ -1,5 +1,5 @@
 <template>
-  <div class="add-btn bg-transparent border-dashed border-2 rounded-sm text-white">
+  <div class="add-btn bg-transparent border-dashed border-2 rounded-sm text-white mx-5">
     <div
       v-if="add"
       class="py-5 px-8"
@@ -90,7 +90,7 @@ export default {
         })
       })
       .then(() => {
-        this.cancelAdd;
+        this.cancelAdd();
       })
     }
   }
