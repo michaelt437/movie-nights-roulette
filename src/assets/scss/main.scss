@@ -1,0 +1,22 @@
+@import "../../../node_modules/tailwindcss/dist/preflight.css";
+@import "../../../node_modules/tailwindcss/dist/utilities.css";
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  padding: 50px;
+  background-color: #222532;
+  color: #ededed;
+}
+
+h1 {
+  color: #222532;
+  text-shadow:
+     1px  1px     #ededed,
+    -1px  1px     #ededed,
+     1px -1px     #ededed,
+    -1px -1px     #ededed;
+}
+
+.user-stack, .add-btn {
+  flex-basis: 300px;
+}
