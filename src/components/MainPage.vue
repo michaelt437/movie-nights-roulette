@@ -4,7 +4,7 @@
     <div class="flex flex-row items-start justify-center pt-10">
       <User
         v-for="user in usersArr"
-        :key="user"
+        :key="user.name"
         :user="user"
         ></User>
       <AddUser></AddUser>
@@ -41,10 +41,14 @@ export default {
     }
   },
   created() {
-    db.collection("users").doc("names")
-    .onSnapshot((doc) => {
-        if(doc.data()) this.usersArr = Object.values(doc.data())
-        console.log(this.usersArr)
+    db.collection("users")
+    .onSnapshot((query) => {
+      query.docChanges().forEach(change => {
+        if(change.type === 'added') {
+          this.usersArr.push(change.doc.data());
+          console.log(this.usersArr);
+        }
+      })
     })
   }
 }
