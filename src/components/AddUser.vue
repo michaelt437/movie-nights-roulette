@@ -51,7 +51,7 @@
         </div>
       </div>
       <div v-else class="p-5 text-center hover:text-teal cursor-pointer" @click="startAdd">
-        <i class="fas fa-plus-circle mr-3"></i> Join the Roulette
+        <i class="fas fa-plus-circle mr-1"></i> Join the Roulette
       </div>
     </div>
   </div>

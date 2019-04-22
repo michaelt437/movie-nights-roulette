@@ -46,9 +46,10 @@
       <div
         v-if="pendingPick"
         key="thePicked"
-        class="user-stack--entry bg-indigo-darker rounded-sm p-5 mb-3 border-2 border-transparent">
-        <p class="text-xl capitalize mb-3" :title="pendingSelectedMovie.title">{{ pendingSelectedMovie.title }}</p>
-        <p class="text-sm capitalize" :class="pendingSelectedMovie.service.value">{{ pendingSelectedMovie.service.name }}</p>
+        class="user-stack--entry bg-indigo-darker rounded-sm px-5 py-3 mb-3 border-2 border-transparent">
+        <p class="text-xl capitalize" :title="pendingSelectedMovie.title">{{ pendingSelectedMovie.title }}</p>
+        <p class="capitalize my-3" :class="pendingSelectedMovie.service.value">{{ pendingSelectedMovie.service.name }}</p>
+        <p class="text-xs">{{ pendingSelectedMovie.duration }} minutes</p>
       </div>
       <div
         v-else-if="!user.pickedTonight"
@@ -59,9 +60,10 @@
       </div>
       <div
         v-for="movie in picks"
-        class="user-stack--entry bg-indigo-darker rounded-sm p-5 mb-3 border-2 border-transparent">
-        <p class="text-xl capitalize mb-3" :title="movie.title">{{ movie.title }}</p>
-        <p class="text-sm capitalize">{{ movie.service }}</p>
+        class="user-stack--entry bg-indigo-darker rounded-sm px-5 py-3 mb-3 border-2 border-transparent">
+        <p class="text-xl capitalize" :title="movie.title">{{ movie.title }}</p>
+        <p class="capitalize my-3">{{ movie.service }}</p>
+        <p class="text-xs">{{ movie.duration }} minutes</p>
       </div>
     </template>
   </div>
