@@ -43,16 +43,21 @@
       </div>
     </template>
     <template v-else>
+      <template v-if="pendingPick">
+        <div
+          key="thePicked"
+          class="user-stack--entry bg-indigo-darker rounded-sm px-5 py-3 mb-1 border-2 border-transparent">
+          <p class="text-xl capitalize" :title="pendingSelectedMovie.title">{{ pendingSelectedMovie.title }}</p>
+          <p class="capitalize my-3" :class="pendingSelectedMovie.service.value">{{ pendingSelectedMovie.service.name }}</p>
+          <p class="text-xs">{{ pendingSelectedMovie.duration }} minutes</p>
+        </div>
+        <div class="mb-3 flex justify-end">
+          <button class="text-sm bg-transparent mr-1 rounded-full text-white p-2" type="button" name="button"><i class="fas fa-dice"></i></button>
+          <button class="text-sm bg-transparent rounded-full text-teal p-2" type="button" name="button"><i class="fas fa-check"></i></button>
+        </div>
+      </template>
       <div
-        v-if="pendingPick"
-        key="thePicked"
-        class="user-stack--entry bg-indigo-darker rounded-sm px-5 py-3 mb-3 border-2 border-transparent">
-        <p class="text-xl capitalize" :title="pendingSelectedMovie.title">{{ pendingSelectedMovie.title }}</p>
-        <p class="capitalize my-3" :class="pendingSelectedMovie.service.value">{{ pendingSelectedMovie.service.name }}</p>
-        <p class="text-xs">{{ pendingSelectedMovie.duration }} minutes</p>
-      </div>
-      <div
-        v-else-if="!user.pickedTonight"
+        v-else
         key="ticket"
         @click="makeRandomPick"
         class="user-stack--make-pick bg-indigo text-center rounded-sm p-5 border-2 border-transparent cursor-pointer">

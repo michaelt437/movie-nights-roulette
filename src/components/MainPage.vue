@@ -27,6 +27,11 @@ export default {
       usersArr: []
     }
   },
+  computed: {
+    someoneHasPicked() {
+      return this.usersArr.every(user => user.pickedTonight);
+    }
+  },
   methods: {
     pullDb() {
       db.collection(this.collection)
