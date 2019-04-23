@@ -52,7 +52,7 @@
           <p class="text-xs">{{ pendingSelectedMovie.duration }} minutes</p>
         </div>
         <div class="mb-3 flex justify-end">
-          <button class="text-sm bg-transparent mr-1 rounded-full text-white p-2" type="button" name="button"><i class="fas fa-dice"></i></button>
+          <button class="text-sm bg-transparent mr-1 rounded-full text-white p-2" type="button" name="button" :disabled="userMoviePool.length == 1" @click="makeRandomPick"><i class="fas fa-dice"></i></button>
           <button class="text-sm bg-transparent rounded-full text-teal p-2" type="button" name="button"><i class="fas fa-check"></i></button>
         </div>
       </template>
@@ -95,6 +95,7 @@ export default {
       placeholderMovie: '',
       duration: '',
       selectedService: '',
+      prevRandomSelection: '',
       randomSelection: ''
     }
   },
@@ -136,14 +137,16 @@ export default {
     },
     makeRandomPick() {
       this.pendingPick = true;
-      this.randomSelection = Math.floor(Math.random() * this.userMoviePool.length)
+      this.prevRandomSelection = this.randomSelection;
+      let temp = Math.floor(Math.random() * this.userMoviePool.length);
+      while(temp === this.prevRandomSelection) {
+        temp = Math.floor(Math.random() * this.userMoviePool.length);
+      }
+      this.randomSelection = temp;
       console.log(this.randomSelection)
     },
     randomizeMovie() {
       this.placeholderMovie = this.placeholderMovies[Math.floor(Math.random() * this.placeholderMovies.length)]
-    },
-    sort(userA, userB) {
-      return userA.created < userB.created
     }
   },
   created() {
@@ -152,9 +155,6 @@ export default {
       querySnapshot.docChanges().forEach((change) => {
         if(change.type === 'added') {
           this.userMoviePool.push(change.doc.data())
-          this.userMoviePool.sort((userA, userB) => {
-            return userA.created - userB.created;
-          })
         }
       })
     })

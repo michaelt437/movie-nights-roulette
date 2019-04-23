@@ -43,6 +43,9 @@ export default {
         })
         this.document = data
       });
+    },
+    sort(userA, userB) {
+      return userA.created < userB.created
     }
   },
   created() {
@@ -51,6 +54,9 @@ export default {
       query.docChanges().forEach(change => {
         if(change.type === 'added') {
           this.usersArr.push(change.doc.data());
+          this.usersArr.sort((userA, userB) => {
+            return userA.created - userB.created;
+          })
           console.log(this.usersArr);
         }
       })
