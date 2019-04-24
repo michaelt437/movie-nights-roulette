@@ -5,7 +5,9 @@
       <User
         v-for="user in usersArr"
         :key="user.name"
-        :user="user"
+        :username="user.name"
+        :userPicked.sync="user.pickedTonight"
+        :canPick="canPick"
         ></User>
       <AddUser></AddUser>
     </div>
@@ -28,8 +30,8 @@ export default {
     }
   },
   computed: {
-    someoneHasPicked() {
-      return this.usersArr.every(user => user.pickedTonight);
+    canPick() {
+      return this.usersArr.every(user => !user.pickedTonight);
     }
   },
   methods: {

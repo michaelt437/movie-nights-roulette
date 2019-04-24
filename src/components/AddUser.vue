@@ -109,14 +109,16 @@ export default {
     },
     submitNewUser() {
       db.collection('users')
-      .add({
+      .doc(this.name)
+      .set({
         name: this.name,
         pickedTonight: false,
         created: Date.parse(new Date())
       })
       .then(() => {
         db.collection(this.name)
-        .add({
+        .doc(this.movieTitle)
+        .set({
           title: this.movieTitle,
           service: this.selectedService,
           duration: this.duration,

@@ -1,7 +1,7 @@
 <template>
   <div class="user-stack flex flex-col mx-5">
     <div class="flex justify-between items-center mb-4">
-      <h3 class="capitalize">{{ user.name }} ({{ userMoviePool.length }})</h3>
+      <h3 class="capitalize">{{ username }} ({{ pickPool.length }})</h3>
       <p class="text-sm cursor-pointer hover:text-teal" @click="addMode ? cancelAddPick() : startAddPick()">
         <i class="fas mr-1" :class="addMode ? 'fa-times' : 'fa-plus-circle'"></i> {{ addMode ? '' : 'Add a pick'}}
       </p>
@@ -52,23 +52,29 @@
           <p class="text-xs">{{ pendingSelectedMovie.duration }} minutes</p>
         </div>
         <div class="mb-3 flex justify-end">
-          <button class="text-sm bg-transparent mr-1 rounded-full text-white p-2" type="button" name="button" :disabled="userMoviePool.length == 1" @click="makeRandomPick"><i class="fas fa-dice"></i></button>
-          <button class="text-sm bg-transparent rounded-full text-teal p-2" type="button" name="button"><i class="fas fa-check"></i></button>
+          <button v-if="allUserMovies.length > 1" class="text-sm bg-transparent mr-1 rounded-full text-white p-2" type="button" name="button" @click="makeRandomPick"><i class="fas fa-dice"></i></button>
+          <button class="text-sm bg-transparent rounded-full text-white p-2" type="button" name="button" @click="cancelMakePick"><i class="fas fa-times"></i></button>
+          <button class="text-sm bg-transparent rounded-full text-teal p-2" type="button" name="button" @click="confirmPick"><i class="fas fa-check"></i></button>
         </div>
       </template>
       <div
         v-else
         key="ticket"
+        :disable="!canPick"
         @click="makeRandomPick"
-        class="user-stack--make-pick bg-indigo text-center rounded-sm p-5 border-2 border-transparent cursor-pointer">
+        :class="pickableState"
+        class="user-stack--make-pick bg-indigo text-center rounded-sm p-5 mb-3 border-2 border-transparent">
         <span class="flex justify-between"><i class="fas fa-star"></i> What's the pick? <i class="fas fa-star"></i></span>
       </div>
       <div
         v-for="movie in picks"
         class="user-stack--entry bg-indigo-darker rounded-sm px-5 py-3 mb-3 border-2 border-transparent">
         <p class="text-xl capitalize" :title="movie.title">{{ movie.title }}</p>
-        <p class="capitalize my-3">{{ movie.service }}</p>
-        <p class="text-xs">{{ movie.duration }} minutes</p>
+        <p class="capitalize my-3" :class="movie.service.value">{{ movie.service.name }}</p>
+        <div class="flex justify-between">
+          <p class="text-xs">{{ movie.duration }} minutes</p>
+          <p class="text-xs">{{ $moment(movie.watchDate).format('MMM D, YYYY') }}</p>
+        </div>
       </div>
     </template>
   </div>
@@ -80,13 +86,16 @@ import randoms from '../randoms'
 export default {
   name: 'user-stack',
   props: {
-    user: {
-      type: Object
+    username: {
+      type: String
+    },
+    canPick: {
+      type: Boolean
     }
   },
   data() {
     return {
-      userMoviePool: [],
+      allUserMovies: [],
       addMode: false,
       pendingPick: false,
       placeholderMovies: randoms.placeholderMovies,
@@ -96,18 +105,26 @@ export default {
       duration: '',
       selectedService: '',
       prevRandomSelection: '',
-      randomSelection: ''
+      randomSelection: '',
+      enablePickBtn: 'cursor-pointer',
+      disablePickBtn: 'opacity-50 cursor-default'
     }
   },
   computed: {
     picks() {
-      return this.userMoviePool.filter(pick => pick.watched)
+      return this.allUserMovies.filter(pick => pick.watched)
+    },
+    pickPool() {
+      return this.allUserMovies.filter(pick => !pick.watched)
     },
     disableAddPick() {
       return this.movieTitle == '' || this.duration == '' || this.selectedService == '';
     },
     pendingSelectedMovie() {
-      return this.userMoviePool[this.randomSelection]
+      return this.allUserMovies[this.randomSelection] || null;
+    },
+    pickableState() {
+      return this.canPick ? this.enablePickBtn : this.disablePickBtn
     }
   },
   methods: {
@@ -122,8 +139,9 @@ export default {
       this.selectedService = '';
     },
     addPickToPool() {
-      db.collection(this.user.name)
-      .add({
+      db.collection(this.username)
+      .doc(this.movieTitle)
+      .set({
         title: this.movieTitle,
         duration: this.duration,
         service: this.selectedService,
@@ -136,25 +154,50 @@ export default {
       })
     },
     makeRandomPick() {
-      this.pendingPick = true;
-      this.prevRandomSelection = this.randomSelection;
-      let temp = Math.floor(Math.random() * this.userMoviePool.length);
-      while(temp === this.prevRandomSelection) {
-        temp = Math.floor(Math.random() * this.userMoviePool.length);
+      if(this.canPick) {
+        this.pendingPick = true;
+        this.prevRandomSelection = this.randomSelection;
+        let temp = Math.floor(Math.random() * this.allUserMovies.length);
+        while(temp === this.prevRandomSelection) {
+          temp = Math.floor(Math.random() * this.allUserMovies.length);
+        }
+        this.randomSelection = temp;
+        console.log(this.randomSelection)
       }
-      this.randomSelection = temp;
-      console.log(this.randomSelection)
     },
     randomizeMovie() {
       this.placeholderMovie = this.placeholderMovies[Math.floor(Math.random() * this.placeholderMovies.length)]
+    },
+    cancelMakePick() {
+      this.pendingPick = false;
+      this.randomSelection = '';
+    },
+    confirmPick() {
+      db.collection('users')
+      .doc(this.username)
+      .update({
+        pickedTonight: true
+      })
+      .then(() => {
+        this.$emit('update:userPicked', true)
+        db.collection(this.username)
+        .doc(this.pendingSelectedMovie.title)
+        .update({
+          watched: true,
+          watchDate: Date.parse(new Date())
+        })
+      })
     }
   },
   created() {
-    db.collection(this.user.name)
-    .onSnapshot((querySnapshot) => {
+    db.collection(this.username)
+    .onSnapshot({ includeMetadataChanges: true }, (querySnapshot) => {
       querySnapshot.docChanges().forEach((change) => {
         if(change.type === 'added') {
-          this.userMoviePool.push(change.doc.data())
+          this.allUserMovies.push(change.doc.data())
+        }
+        if(change.type === 'modified') {
+          console.log('this doc has changed ', change.doc.data())
         }
       })
     })
