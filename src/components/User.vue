@@ -64,7 +64,10 @@
         @click="makeRandomPick"
         :class="pickableState"
         class="user-stack--make-pick bg-indigo text-center rounded-sm p-5 mb-3 border-2 border-transparent">
-        <span class="flex justify-between"><i class="fas fa-star"></i> What's the pick? <i class="fas fa-star"></i></span>
+        <span class="flex justify-between">
+          <i class="fas" :class="canPick ? 'fa-star' : 'fa-long-arrow-alt-down'"></i>
+          {{canPick ? "What's the pick?" : "Tonight's Pick"}}
+          <i class="fas" :class="canPick ? 'fa-star' : 'fa-long-arrow-alt-down'"></i></span>
       </div>
       <div
         v-for="movie in picks"
@@ -91,6 +94,9 @@ export default {
     },
     canPick: {
       type: Boolean
+    },
+    userPicked: {
+      type: Boolean
     }
   },
   data() {
@@ -107,7 +113,8 @@ export default {
       prevRandomSelection: '',
       randomSelection: '',
       enablePickBtn: 'cursor-pointer',
-      disablePickBtn: 'opacity-50 cursor-default'
+      disablePickBtn: 'opacity-50 cursor-default',
+      selectorsChoice: 'cursor-default text-yellow'
     }
   },
   computed: {
@@ -124,7 +131,8 @@ export default {
       return this.allUserMovies[this.randomSelection] || null;
     },
     pickableState() {
-      return this.canPick ? this.enablePickBtn : this.disablePickBtn
+      return this.canPick ? this.enablePickBtn :
+        this.userPicked ? this.selectorsChoice : this.disablePickBtn
     }
   },
   methods: {
@@ -176,7 +184,8 @@ export default {
       db.collection('users')
       .doc(this.username)
       .update({
-        pickedTonight: true
+        pickedTonight: true,
+        pickedDateTime: Date.parse(new Date())
       })
       .then(() => {
         this.$emit('update:userPicked', true)

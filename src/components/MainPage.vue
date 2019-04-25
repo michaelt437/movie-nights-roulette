@@ -32,6 +32,9 @@ export default {
   computed: {
     canPick() {
       return this.usersArr.every(user => !user.pickedTonight);
+    },
+    lastPicker() {
+      return this.usersArr.filter(user => user.pickedTonight);
     }
   },
   methods: {
@@ -51,18 +54,37 @@ export default {
     }
   },
   created() {
-    db.collection("users")
-    .onSnapshot((query) => {
-      query.docChanges().forEach(change => {
-        if(change.type === 'added') {
-          this.usersArr.push(change.doc.data());
-          this.usersArr.sort((userA, userB) => {
-            return userA.created - userB.created;
-          })
-          console.log(this.usersArr);
-        }
+    let init = new Promise((resolve, reject) => {
+      db.collection("users")
+      .onSnapshot((query) => {
+        query.docChanges().forEach(change => {
+          if(change.type === 'added') {
+            this.usersArr.push(change.doc.data());
+            this.usersArr.sort((userA, userB) => {
+              return userA.created - userB.created;
+            })
+            console.log(this.usersArr);
+          }
+        })
       })
-    })
+      resolve('done!')
+    });
+
+    init.then((value) => {
+      setTimeout(() => {
+        if(!this.canPick) {
+          if((new this.$moment().valueOf()) > this.$moment(this.lastPicker.pickedDateTime).add(1, 'days').hours(5).valueOf()) {
+            db.collection('users')
+            .doc(this.lastPicker.name)
+            .update({
+              pickedDateTime: null
+            })
+          }else{
+            console.log('hello darkness, my old friend...')
+          }
+        }
+      }, 500)
+    });
   }
 }
 </script>
