@@ -18,7 +18,7 @@
           type="text"
           name="username" />
 
-        <h4 class="italic text-center mb-4">Add a Movie</h4>
+        <!-- <h4 class="italic text-center mb-4">Add a Movie</h4>
         <p class="mb-2">Movie Title</p>
         <input
           v-model="movieTitle"
@@ -37,8 +37,8 @@
         <select class="rounded-sm p-3 min-w-full" name="service" v-model="selectedService">
           <option value="" selected disabled hidden>watchmovies123.com</option>
           <option v-for="(service, i) in streamingService" :value="streamingService[i]">{{ service.name }}</option>
-        </select>
-        <hr class="my-8 border border-teal-dark border-solid">
+        </select> -->
+        <!-- <hr class="my-8 border border-teal-dark border-solid"> -->
         <div class="text-white flex flex-row justify-between">
           <button class="flex-1 mr-3 px-3 py-2 bg-transparent border-solid border-white border rounded-sm text-white" type="button" name="button" @click="cancelAdd">Cancel</button>
           <button
@@ -81,7 +81,8 @@ export default {
   },
   computed: {
     disableSubmit() {
-      return this.name == '' || this.movieTitle == '' || this.duration == '' || this.selectedService == ''
+      return this.name == ''
+      // return this.name == '' || this.movieTitle == '' || this.duration == '' || this.selectedService == ''
     }
   },
   methods: {

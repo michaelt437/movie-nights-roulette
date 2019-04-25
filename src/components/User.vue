@@ -60,14 +60,14 @@
       <div
         v-else
         key="ticket"
-        :disable="!canPick"
+        :disable="!canPick || pickPool.length == 0"
         @click="makeRandomPick"
         :class="pickableState"
         class="user-stack--make-pick bg-indigo text-center rounded-sm p-5 mb-3 border-2 border-transparent">
         <span class="flex justify-between">
-          <i class="fas" :class="canPick ? 'fa-star' : 'fa-long-arrow-alt-down'"></i>
-          {{canPick ? "What's the pick?" : "Tonight's Pick"}}
-          <i class="fas" :class="canPick ? 'fa-star' : 'fa-long-arrow-alt-down'"></i></span>
+          <i class="fas" :class="!userPicked ? 'fa-star' : 'fa-long-arrow-alt-down'"></i>
+          {{!userPicked ? "What's the pick?" : "Tonight's Pick"}}
+          <i class="fas" :class="!userPicked ? 'fa-star' : 'fa-long-arrow-alt-down'"></i></span>
       </div>
       <div
         v-for="movie in picks"
@@ -131,7 +131,7 @@ export default {
       return this.allUserMovies[this.randomSelection] || null;
     },
     pickableState() {
-      return this.canPick ? this.enablePickBtn :
+      return (this.canPick && this.pickPool.length > 0) ? this.enablePickBtn :
         this.userPicked ? this.selectorsChoice : this.disablePickBtn
     }
   },
