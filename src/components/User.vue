@@ -7,7 +7,7 @@
       </p>
     </div>
     <template v-if="addMode">
-      <div class="border-dashed border-2 rounded-sm text-white py-5 px-8">
+      <div class="border-dashed border-2 rounded-sm text-white py-5 px-8 relative" :class="{'addSuccess' : success}">
         <h4 class="text-lg text-center italic">Add a Pick</h4>
         <hr class="my-5 border border-teal-dark border-solid">
         <p class="mb-2">Movie Title</p>
@@ -32,9 +32,9 @@
         <hr class="my-5 border border-teal-dark border-solid">
         <div class="text-white flex flex-row justify-between">
           <button class="flex-1 mr-3 px-3 py-2 bg-transparent border-solid border-white border rounded-sm text-white" type="button" name="button" @click="cancelAddPick">Back</button>
+          <!-- :class="{'opacity-50 cursor-default' : disableAddPick }"
+          :disabled="disableAddPick" -->
           <button
-            :class="{'opacity-50 cursor-default' : disableAddPick }"
-            :disabled="disableAddPick"
             @click="addPickToPool"
             class="flex-1 px-3 py-2 bg-teal-dark border-teal-dark border rounded-sm text-white" type="button" name="button">
               Add
@@ -46,15 +46,16 @@
       <template v-if="pendingPick">
         <div
           key="thePicked"
+          :class="{'animate-select' : selectConfirm }"
           class="user-stack--entry bg-indigo-darker rounded-sm px-5 py-3 mb-1 border-2 border-transparent">
           <p class="text-xl capitalize" :title="pendingSelectedMovie.title">{{ pendingSelectedMovie.title }}</p>
           <p class="capitalize my-3" :class="pendingSelectedMovie.service.value">{{ pendingSelectedMovie.service.name }}</p>
           <p class="text-xs">{{ pendingSelectedMovie.duration }} minutes</p>
         </div>
-        <div class="mb-3 flex justify-end">
+        <div class="mb-3 flex justify-end" v-show="!hidePickActions">
           <button v-if="allUserMovies.length > 1" class="text-sm bg-transparent mr-1 rounded-full text-white p-2" type="button" name="button" @click="makeRandomPick"><i class="fas fa-dice"></i></button>
           <button class="text-sm bg-transparent rounded-full text-white p-2" type="button" name="button" @click="cancelMakePick"><i class="fas fa-times"></i></button>
-          <button class="text-sm bg-transparent rounded-full text-teal p-2" type="button" name="button" @click="confirmPick"><i class="fas fa-check"></i></button>
+          <button class="text-sm bg-transparent rounded-full text-teal p-2" type="button" name="button" @click="confirmPick"><i class="fas" :class="canPick ? 'fa-check' : 'fa-thumbs-up'"></i></button>
         </div>
       </template>
       <div
@@ -114,7 +115,10 @@ export default {
       randomSelection: '',
       enablePickBtn: 'cursor-pointer',
       disablePickBtn: 'opacity-50 cursor-default',
-      selectorsChoice: 'cursor-default text-yellow'
+      selectorsChoice: 'cursor-default text-yellow',
+      success: false,
+      selectConfirm: false,
+      hidePickActions: false
     }
   },
   computed: {
@@ -159,7 +163,11 @@ export default {
         this.movieTitle = '';
         this.duration = '';
         this.selectedService = '';
-      })
+        this.success = true;
+        setTimeout(() => {
+          this.success = false;
+        }, 1000);
+      });
     },
     makeRandomPick() {
       if(this.canPick) {
@@ -188,14 +196,21 @@ export default {
         pickedDateTime: Date.parse(new Date())
       })
       .then(() => {
-        this.$emit('update:userPicked', true)
         db.collection(this.username)
         .doc(this.pendingSelectedMovie.title)
         .update({
           watched: true,
           watchDate: Date.parse(new Date())
         })
-      })
+        this.$emit('update:userPicked', true)
+        this.selectConfirm = true;
+        setTimeout(() => {
+          this.selectConfirm = false;
+        }, 500);
+        setTimeout(() => {
+          this.hidePickActions = true;
+        }, 700)
+      });
     }
   },
   created() {

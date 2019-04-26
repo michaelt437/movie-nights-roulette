@@ -116,16 +116,16 @@ export default {
         pickedTonight: false,
         created: Date.parse(new Date())
       })
-      .then(() => {
-        db.collection(this.name)
-        .doc(this.movieTitle)
-        .set({
-          title: this.movieTitle,
-          service: this.selectedService,
-          duration: this.duration,
-          watched: false
-        });
-      })
+      // .then(() => {
+      //   db.collection(this.name)
+      //   .doc(this.movieTitle)
+      //   .set({
+      //     title: this.movieTitle,
+      //     service: this.selectedService,
+      //     duration: this.duration,
+      //     watched: false
+      //   });
+      // })
       .then(() => {
         this.cancelAdd();
       })

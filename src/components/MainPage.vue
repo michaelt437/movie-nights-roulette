@@ -34,7 +34,7 @@ export default {
       return this.usersArr.every(user => !user.pickedTonight);
     },
     lastPicker() {
-      return this.usersArr.filter(user => user.pickedTonight);
+      return this.usersArr.find(user => user.pickedTonight);
     }
   },
   methods: {
@@ -73,17 +73,17 @@ export default {
     init.then((value) => {
       setTimeout(() => {
         if(!this.canPick) {
-          if((new this.$moment().valueOf()) > this.$moment(this.lastPicker.pickedDateTime).add(1, 'days').hours(5).valueOf()) {
+          if((new this.$moment().valueOf()) > this.$moment(this.lastPicker.pickedDateTime).add(1, 'days').hours(12).valueOf()) {
             db.collection('users')
             .doc(this.lastPicker.name)
             .update({
-              pickedDateTime: null
+              pickedTonight: false
             })
           }else{
             console.log('hello darkness, my old friend...')
           }
         }
-      }, 500)
+      }, 2000)
     });
   }
 }
