@@ -1,5 +1,5 @@
 <template>
-  <div class="user-stack flex flex-col mx-5">
+  <div class="user-stack flex flex-col mx-5 mb-10">
     <div class="flex justify-between items-center mb-4">
       <h3 class="capitalize">{{ username }} ({{ pickPool.length }})</h3>
       <p class="text-sm cursor-pointer hover:text-teal" @click="addMode ? cancelAddPick() : startAddPick()">
@@ -53,9 +53,9 @@
           <p class="text-xs">{{ pendingSelectedMovie.duration }} minutes</p>
         </div>
         <div class="mb-3 flex justify-end" v-show="!hidePickActions">
-          <button v-if="allUserMovies.length > 1" class="text-sm bg-transparent mr-1 rounded-full text-white p-2" type="button" name="button" @click="makeRandomPick"><i class="fas fa-dice"></i></button>
-          <button class="text-sm bg-transparent rounded-full text-white p-2" type="button" name="button" @click="cancelMakePick"><i class="fas fa-times"></i></button>
-          <button class="text-sm bg-transparent rounded-full text-teal p-2" type="button" name="button" @click="confirmPick"><i class="fas" :class="canPick ? 'fa-check' : 'fa-thumbs-up'"></i></button>
+          <button v-if="allUserMovies.length > 1" class="text-sm bg-transparent mr-1 rounded-full text-white p-2" title="Re-roll  " type="button" name="button" @click="makeRandomPick"><i class="fas fa-dice"></i></button>
+          <button class="text-sm bg-transparent rounded-full text-white p-2" title="Hmm, nah..." type="button" name="button" @click="cancelMakePick"><i class="fas fa-times"></i></button>
+          <button class="text-sm bg-transparent rounded-full text-teal p-2" title="Yes!" type="button" name="button" @click="confirmPick"><i class="fas" :class="canPick ? 'fa-check' : 'fa-thumbs-up'"></i></button>
         </div>
       </template>
       <div
@@ -209,7 +209,7 @@ export default {
         }, 500);
         setTimeout(() => {
           this.hidePickActions = true;
-        }, 700)
+        }, 900)
       });
     }
   },
