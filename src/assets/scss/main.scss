@@ -1,9 +1,13 @@
 @import "../../../node_modules/tailwindcss/dist/preflight.css";
 @import "../../../node_modules/tailwindcss/dist/utilities.css";
 
+html, body {
+  height: 100%;
+}
+
 body {
   font-family: 'Segoe UI', sans-serif;
-  padding: 50px;
+  padding: 50px 50px 25px;
   background-color: #222532;
   color: #ededed;
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="add-btn flex flex-col mx-5">
+  <div class="add-btn flex flex-col mx-5 mb-5">
     <div class="mb-4">
       <h3 class="text-center"><i class="fas fa-pizza-slice"></i></h3>
     </div>

@@ -23,7 +23,9 @@ If you confirm the pick, other members will be locked from making a pick. Select
 1. Add authentication, most likely Google
 2. Ability to see your pool
 3. Delete picks from pool
-4. ????
+4. Better responsive behavior
+5. PWA?
+6. ?????
 
 ## Installing and running
 ```
