@@ -78,6 +78,7 @@ export default {
       fb.auth().signOut()
       .then(result => {
         console.log('signout')
+        window.alert("See ya later alligator")
       });
     },
     sort(userA, userB) {
@@ -124,7 +125,6 @@ export default {
       } else {
         // No user is signed in.
         this.signedIn = false;
-        window.alert("See ya later alligator")
       }
     });
 

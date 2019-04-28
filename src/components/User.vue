@@ -97,6 +97,12 @@
           <p v-if="!displayPickPool" class="text-xs">{{ $moment(movie.watchDate).format('MMM D, YYYY') }}</p>
         </div>
       </div>
+      <div v-if="!signedIn && picks.length == 0" class="opacity-50 bg-transparent border-2 border-white border-dashed rounded-sm px-5 py-3 text-center">
+          <i class="far fa-frown fa-3x mb-3"></i>
+          <br>
+          EMPTY
+      </div>
+
     </template>
   </div>
 </template>
