@@ -32,3 +32,9 @@ If you confirm the pick, other members will be locked from making a pick. Select
 npm install
 npm run serve
 ```
+
+### Technologies
+
+- Vuejs
+- Tailwindcss
+- Firestore

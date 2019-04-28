@@ -1,6 +1,24 @@
 <template>
   <div class="container">
-    <h1 class="text-center">Movie Nights Roulette</h1>
+    <div class="flex flex-row justify-between items-center">
+      <div class="flex flex-1">
+
+      </div>
+      <div class="flex flex-1 justify-center">
+        <h1 class="text-center">Movie Nights Roulette</h1>
+      </div>
+      <div class="flex flex-1 justify-end items-center">
+        <a v-if="!signedIn" href="#" @click.prevent="login" class="text-white hover:text-teal no-underline">Join the Roulette</a>
+        <button
+        @click="userAuth"
+        :class="signedIn ? 'bg-pink-dark hover:bg-pink' : 'bg-teal-dark hover:bg-teal'"
+        class="text-white px-3 py-2 rounded-sm ml-5"
+        type="button"
+        name="button">
+          {{ signedIn ? 'Log Out' : 'Log In'}}
+        </button>
+      </div>
+    </div>
     <div class="flex flex-row flex-wrap items-start justify-center pt-10">
       <User
         v-for="user in usersArr"
@@ -8,14 +26,16 @@
         :username="user.name"
         :userPicked.sync="user.pickedTonight"
         :canPick="canPick"
+        :signedIn="signedIn"
+        :authorizeActions="user.email == userEmail"
         ></User>
-      <AddUser></AddUser>
+      <!-- <AddUser></AddUser> -->
     </div>
   </div>
 </template>
 
 <script>
-import { db } from '../db'
+import { db, auth, fb } from '../db'
 import AddUser from './AddUser'
 import User from './User'
 export default {
@@ -26,7 +46,9 @@ export default {
   },
   data() {
     return {
-      usersArr: []
+      usersArr: [],
+      signedIn: false,
+      userEmail: ''
     }
   },
   computed: {
@@ -38,15 +60,24 @@ export default {
     }
   },
   methods: {
-    pullDb() {
-      db.collection(this.collection)
-      .get()
-      .then(querySnapshot => {
-        let data = []
-        querySnapshot.forEach(doc => {
-          data.push(doc.data())
+    userAuth() {
+      if(this.signedIn) {
+        this.signOut();
+      }else{
+        let provider = new auth.GoogleAuthProvider();
+        fb.auth().signInWithRedirect(provider)
+        .then((result) => {
+
         })
-        this.document = data
+        .catch((error) => {
+          console.log('auth error: ', error)
+        })
+      }
+    },
+    signOut() {
+      fb.auth().signOut()
+      .then(result => {
+        console.log('signout')
       });
     },
     sort(userA, userB) {
@@ -63,7 +94,6 @@ export default {
             this.usersArr.sort((userA, userB) => {
               return userA.created - userB.created;
             })
-            console.log(this.usersArr);
           }
         })
       })
@@ -85,6 +115,19 @@ export default {
         }
       }, 2000)
     });
+
+    fb.auth().onAuthStateChanged((user) => {
+      if (user) {
+        // User is signed in.
+        this.signedIn = true;
+        this.userEmail = user.email;
+      } else {
+        // No user is signed in.
+        this.signedIn = false;
+        window.alert("See ya later alligator")
+      }
+    });
+
   }
 }
 </script>
