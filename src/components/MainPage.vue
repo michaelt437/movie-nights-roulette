@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import { db, auth, fb } from '../db'
+import { db, auth, fb, testingKey } from '../db'
 import AddUser from './AddUser'
 import User from './User'
 export default {
