@@ -157,6 +157,10 @@ const random = {
     { name: "Viki",
       value: "viki"
     },
+    {
+      name: "Hoopla",
+      value: "hoopla"
+    },
     { name: "Criterion Collection",
       value: "critcol"
     },
@@ -167,10 +171,6 @@ const random = {
     { name: "Download",
       value: "dl"
     },
-    {
-      name: "Hoopla",
-      value: "hoopla"
-    }
   ]
 }
 
