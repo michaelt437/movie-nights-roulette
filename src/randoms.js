@@ -167,6 +167,10 @@ const random = {
     { name: "Download",
       value: "dl"
     },
+    {
+      name: "Hoopla",
+      value: "hoopla"
+    }
   ]
 }
 
