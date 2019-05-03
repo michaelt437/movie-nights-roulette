@@ -20,7 +20,8 @@
       </div>
     </div>
     <div class="flex flex-row flex-wrap items-start justify-center pt-10">
-      <User
+      <template v-if="!signedIn || signedIn && userExists">
+        <User
         v-for="user in usersArr"
         :key="user.name"
         :username="user.name"
@@ -29,7 +30,8 @@
         :signedIn="signedIn"
         :authorizeActions="user.email == userEmail"
         ></User>
-      <!-- <AddUser></AddUser> -->
+      </template>
+      <AddUser v-if="signedIn && !userExists"></AddUser>
     </div>
   </div>
 </template>
@@ -57,6 +59,9 @@ export default {
     },
     lastPicker() {
       return this.usersArr.find(user => user.pickedTonight);
+    },
+    userExists() {
+      return this.usersArr.find(user => user.email == this.userEmail)
     }
   },
   methods: {

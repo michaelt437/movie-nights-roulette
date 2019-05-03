@@ -3,7 +3,7 @@
     <div class="flex justify-between items-center mb-4">
       <h3 v-if="!displayPickPool" class="capitalize">{{ username }}
         <template v-if="signedIn">
-          <template v-if="authorizeActions">
+          <template v-if="authorizeActions && !addMode">
             - <a href="#" @click.prevent="showPickPool" class="cursor-pointer text-teal no-underline">{{ pickPool.length }}</a>
           </template>
           <template v-else>
@@ -92,9 +92,10 @@
         class="user-stack--entry bg-indigo-darker rounded-sm px-5 py-3 mb-3 border-2 border-transparent">
         <p class="text-xl capitalize" :title="movie.title">{{ movie.title }}</p>
         <p class="capitalize my-3" :class="movie.service.value">{{ movie.service.name }}</p>
-        <div class="flex justify-between">
+        <div class="flex justify-between items-center">
           <p class="text-xs">{{ movie.duration }} minutes</p>
-          <p v-if="!displayPickPool" class="text-xs">{{ $moment(movie.watchDate).format('MMM D, YYYY') }}</p>
+          <i v-if="displayPickPool" class="far fa-trash-alt text-red-light text-xs cursor-pointer" title="Trash it" @click="rmPick(movie)"></i>
+          <p v-else class="text-xs">{{ $moment(movie.watchDate).format('MMM D, YYYY') }}</p>
         </div>
       </div>
       <div v-if="!signedIn && picks.length == 0" class="opacity-50 bg-transparent border-2 border-white border-dashed rounded-sm px-5 py-3 text-center">
@@ -155,7 +156,7 @@ export default {
   computed: {
     picks() {
       return this.allUserMovies.filter(pick => pick.watched).sort((a,b) => {
-        return a.watchDate < b.watchDate
+        return b.watchDate - a.watchDate
       })
     },
     pickPool() {
@@ -175,6 +176,7 @@ export default {
   methods: {
     startAddPick() {
       this.addMode = true;
+      this.displayPickPool = false;
       this.randomizeMovie();
     },
     cancelAddPick() {
@@ -246,6 +248,16 @@ export default {
     },
     showPickPool() {
       this.displayPickPool = true
+    },
+    rmPick(pick) {
+      const confirm = window.confirm("Are you sure you want to remove this pick?");
+      if(confirm) {
+        db.collection(this.username)
+        .doc(pick.title)
+        .delete()
+      }else{
+        false;
+      }
     }
   },
   created() {
@@ -256,9 +268,11 @@ export default {
           this.allUserMovies.push(change.doc.data())
         }
         if(change.type === 'modified') {
-          console.log('this doc has changed ', change.doc.data())
-          let f = this.pickPool.find((movie, i) => movie.title === change.doc.data().title)
-          this.pickPool.splice(f, 1);
+          this.allUserMovies = this.allUserMovies.filter(movie => movie.title !== change.doc.data().title)
+        }
+        if(change.type === 'removed') {
+          console.log('something was deleted!', change.doc.data())
+          this.allUserMovies = this.allUserMovies.filter(movie => movie.title !== change.doc.data().title)
         }
       })
     })

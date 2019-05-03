@@ -10,7 +10,7 @@
         >
         <h4 class="text-lg text-center italic">{{ quote }}</h4>
         <hr class="my-5 border border-teal-dark border-solid">
-        <p class="mb-2">Name</p>
+        <p class="mb-2">Username</p>
         <input
           v-model="name"
           :placeholder="randomName"
