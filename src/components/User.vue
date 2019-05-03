@@ -59,8 +59,8 @@
         <template v-if="pendingPick">
           <div
             key="thePicked"
-            :class="{'animate-select' : selectConfirm }"
-            class="user-stack--entry bg-indigo-darker rounded-sm px-5 py-3 mb-1 border-2 border-transparent">
+            :class="{'animate-select' : selectConfirm, 'mb-3' : hidePickActions }"
+            class="user-stack--entry bg-indigo-darker rounded-sm px-5 py-3">
             <p class="text-xl capitalize" :title="pendingSelectedMovie.title">{{ pendingSelectedMovie.title }}</p>
             <p class="capitalize my-3" :class="pendingSelectedMovie.service.value">{{ pendingSelectedMovie.service.name }}</p>
             <div class="flex justify-between">
@@ -69,7 +69,7 @@
             </div>
           </div>
           <div class="mb-3 flex justify-end" v-show="!hidePickActions">
-            <button v-if="allUserMovies.length > 1" class="text-sm bg-transparent mr-1 rounded-full text-white p-2" title="Re-roll  " type="button" name="button" @click="makeRandomPick"><i class="fas fa-dice"></i></button>
+            <button v-if="allUserMovies.length > 1" class="text-sm bg-transparent mr-1 rounded-full text-white p-2" title="Re-roll" type="button" name="button" @click="makeRandomPick('pickPool')"><i class="fas fa-dice"></i></button>
             <button class="text-sm bg-transparent rounded-full text-white p-2" title="Hmm, nah..." type="button" name="button" @click="cancelMakePick"><i class="fas fa-times"></i></button>
             <button class="text-sm bg-transparent rounded-full text-teal p-2" title="Yes!" type="button" name="button" @click="confirmPick"><i class="fas" :class="canPick ? 'fa-check' : 'fa-thumbs-up'"></i></button>
           </div>
@@ -77,19 +77,20 @@
         <div
           v-else
           key="ticket"
-          :disable="!canPick || pickPool.length == 0"
-          @click="makeRandomPick"
-          :class="pickableState"
-          class="user-stack--make-pick bg-indigo text-center rounded-sm p-5 mb-3 border-2 border-transparent">
-          <span class="flex justify-between">
+          class="user-stack--make-pick text-center mb-3">
+          <span :class="pickableState" class="random flex justify-between bg-indigo rounded-t-sm border-bottom p-5" @click="makeRandomPick('pickPool')">
             <i class="fas" :class="!userPicked ? 'fa-star' : 'fa-long-arrow-alt-down'"></i>
             {{!userPicked ? "What's the pick?" : "Tonight's Pick"}}
             <i class="fas" :class="!userPicked ? 'fa-star' : 'fa-long-arrow-alt-down'"></i></span>
+          <div v-if="!userPicked" class="user-stack--lengths flex">
+            <div :class="(shortPool.length > 0 && canPick) ? enablePickBtn : disablePickBtn" class="length--short bg-indigo flex-1 py-3 text-sm rounded-bl-sm" @click="makeRandomPick('shortPool')">Short</div>
+            <div :class="(longPool.length > 0 && canPick) ? enablePickBtn : disablePickBtn" class="length--long bg-indigo flex-1 py-3 text-sm rounded-br-sm" @click="makeRandomPick('longPool')">Long</div>
+          </div>
         </div>
       </template>
       <div
         v-for="movie in (displayPickPool ? pickPool : picks)"
-        class="user-stack--entry bg-indigo-darker rounded-sm px-5 py-3 mb-3 border-2 border-transparent">
+        class="user-stack--entry bg-indigo-darker rounded-sm px-5 py-3 mb-3">
         <p class="text-xl capitalize" :title="movie.title">{{ movie.title }}</p>
         <p class="capitalize my-3" :class="movie.service.value">{{ movie.service.name }}</p>
         <div class="flex justify-between items-center">
@@ -144,13 +145,14 @@ export default {
       selectedService: '',
       prevRandomSelection: '',
       randomSelection: '',
-      enablePickBtn: 'cursor-pointer',
+      enablePickBtn: 'cursor-pointer hover:bg-indigo-dark',
       disablePickBtn: 'opacity-50 cursor-default',
       selectorsChoice: 'cursor-default text-yellow',
       success: false,
       selectConfirm: false,
       hidePickActions: false,
-      displayPickPool: false
+      displayPickPool: false,
+      pickType: ''
     }
   },
   computed: {
@@ -162,11 +164,17 @@ export default {
     pickPool() {
       return this.allUserMovies.filter(pick => !pick.watched)
     },
+    shortPool() {
+      return this.pickPool.filter(pick => pick.duration < 106)
+    },
+    longPool() {
+      return this.pickPool.filter(pick => pick.duration >= 106)
+    },
     disableAddPick() {
       return this.movieTitle == '' || this.duration == '' || this.selectedService == '';
     },
     pendingSelectedMovie() {
-      return this.pickPool[this.randomSelection] || null;
+      return this[this.pickType][this.randomSelection] || null;
     },
     pickableState() {
       return (this.canPick && this.pickPool.length > 0) ? this.enablePickBtn :
@@ -204,15 +212,18 @@ export default {
         }, 1000);
       });
     },
-    makeRandomPick() {
+    makeRandomPick(type) {
+      this.pickType = type;
       if(this.canPick) {
-        this.pendingPick = true;
-        this.prevRandomSelection = this.randomSelection;
-        let temp = Math.floor(Math.random() * this.pickPool.length);
-        while(temp === this.prevRandomSelection) {
-          temp = Math.floor(Math.random() * this.pickPool.length);
+        if(this[type].length > 0) {
+          this.pendingPick = true;
+          this.prevRandomSelection = this.randomSelection;
+          let temp = Math.floor(Math.random() * this[type].length);
+          while(temp === this.prevRandomSelection) {
+            temp = Math.floor(Math.random() * this[type].length);
+          }
+          this.randomSelection = temp;
         }
-        this.randomSelection = temp;
       }
     },
     randomizeMovie() {

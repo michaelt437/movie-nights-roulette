@@ -18,15 +18,6 @@ Under your name is a big indigo button. Clicking the button will randomly select
 
 If you confirm the pick, other members will be locked from making a pick. Selection will re-open the following day after noon.
 
-### To-Do List
-
-1. ~Add authentication, most likely Google~
-2. ~Ability to see your pool~
-3. Delete picks from pool
-4. Better responsive behavior
-5. PWA?
-6. ?????
-
 ## Installing and running
 ```
 npm install

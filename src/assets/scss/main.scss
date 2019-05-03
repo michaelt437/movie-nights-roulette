@@ -56,6 +56,21 @@ h1 {
   }
 }
 
+.user-stack--make-pick * {
+  transition: all .125s ease-in-out;
+}
+.user-stack--make-pick .random {
+  border-bottom: 1px solid rgba(#ffffff, 0.1);
+}
+.user-stack--make-pick span:last-child {
+  border-radius: .125rem;
+}
+.user-stack--lengths {
+  .length--short {
+    border-right: 1px solid rgba(#ffffff, 0.1);
+  }
+}
+
 .fade-enter-active, .fade-leave-active {
   transition: opacity .5s;
 }
