@@ -22,7 +22,7 @@
       <div class="border-dashed border-2 rounded-sm text-white py-5 px-8 relative" :class="{'addSuccess' : success}">
         <h4 class="text-lg text-center italic">Add a Pick</h4>
         <hr class="my-5 border border-teal-dark border-solid">
-        <p class="mb-2">Movie Title</p>
+        <p class="mb-2">Movie Title <span v-if="duplicate" class="text-pink-dark italic">- already exists</span></p>
         <input
           v-model="movieTitle"
           :placeholder="placeholderMovie"
@@ -60,7 +60,7 @@
           <div
             key="thePicked"
             :class="{'animate-select' : selectConfirm, 'mb-3' : hidePickActions }"
-            class="user-stack--entry bg-indigo-darker rounded-sm px-5 py-3">
+            class="user-stack--entry bg-indigo-darker rounded-r-sm  px-5 py-3">
             <p class="text-xl capitalize" :title="pendingSelectedMovie.title">{{ pendingSelectedMovie.title }}</p>
             <p class="capitalize my-3" :class="pendingSelectedMovie.service.value">{{ pendingSelectedMovie.service.name }}</p>
             <div class="flex justify-between">
@@ -90,7 +90,7 @@
       </template>
       <div
         v-for="movie in (displayPickPool ? pickPool : picks)"
-        class="user-stack--entry bg-indigo-darker rounded-sm px-5 py-3 mb-3">
+        class="user-stack--entry bg-indigo-darker rounded-r-sm px-5 py-3 mb-3">
         <p class="text-xl capitalize" :title="movie.title">{{ movie.title }}</p>
         <p class="capitalize my-3" :class="movie.service.value">{{ movie.service.name }}</p>
         <div class="flex justify-between items-center">
@@ -152,7 +152,8 @@ export default {
       selectConfirm: false,
       hidePickActions: false,
       displayPickPool: false,
-      pickType: ''
+      pickType: '',
+      duplicate: false
     }
   },
   computed: {
@@ -160,6 +161,9 @@ export default {
       return this.allUserMovies.filter(pick => pick.watched).sort((a,b) => {
         return b.watchDate - a.watchDate
       })
+    },
+    existingTitles() {
+      return this.allUserMovies.map(pick => pick.title.toLowerCase())
     },
     pickPool() {
       return this.allUserMovies.filter(pick => !pick.watched)
@@ -192,25 +196,33 @@ export default {
       this.movieTitle = '';
       this.duration = '';
       this.selectedService = '';
+      this.duplicate = false;
     },
     addPickToPool() {
-      db.collection(this.username)
-      .doc(this.movieTitle)
-      .set({
-        title: this.movieTitle,
-        duration: this.duration,
-        service: this.selectedService,
-        watched: false
-      })
-      .then(() => {
-        this.movieTitle = '';
-        this.duration = '';
-        this.selectedService = '';
-        this.success = true;
-        setTimeout(() => {
-          this.success = false;
-        }, 1000);
-      });
+      if(this.existingTitles.includes(this.movieTitle.toLowerCase())) {
+        this.duplicate = true;
+      }else{
+        if(this.duplicate) {
+          this.duplicate = false;
+        }
+        db.collection(this.username)
+        .doc(this.movieTitle)
+        .set({
+          title: this.movieTitle,
+          duration: this.duration,
+          service: this.selectedService,
+          watched: false
+        })
+        .then(() => {
+          this.movieTitle = '';
+          this.duration = '';
+          this.selectedService = '';
+          this.success = true;
+          setTimeout(() => {
+            this.success = false;
+          }, 1000);
+        });
+      }
     },
     makeRandomPick(type) {
       this.pickType = type;
