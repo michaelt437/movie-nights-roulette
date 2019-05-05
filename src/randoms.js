@@ -151,6 +151,15 @@ const random = {
     { name: "Vudu",
       value: "vudu"
     },
+    { name: "HBO",
+      value: "hbo"
+    },
+    { name: "VRV",
+      value: "vrv"
+    },
+    { name: "Criterion Collection",
+      value: "critcol"
+    },
     { name: "Tubi",
       value: "tubi"
     },
@@ -160,9 +169,6 @@ const random = {
     {
       name: "Hoopla",
       value: "hoopla"
-    },
-    { name: "Criterion Collection",
-      value: "critcol"
     },
     {
       name: "DVD/Bluray",
