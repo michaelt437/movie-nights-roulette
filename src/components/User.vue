@@ -83,11 +83,28 @@
             {{!userPicked ? "What's the pick?" : "Tonight's Pick"}}
             <i class="fas" :class="!userPicked ? 'fa-star' : 'fa-long-arrow-alt-down'"></i></span>
           <div v-if="!userPicked" class="user-stack--lengths flex">
-            <div :class="(shortPool.length > 0 && canPick) ? enablePickBtn : disablePickBtn" class="length--short bg-indigo flex-1 py-3 text-sm rounded-bl-sm" @click="makeRandomPick('shortPool')">Short</div>
-            <div :class="(longPool.length > 0 && canPick) ? enablePickBtn : disablePickBtn" class="length--long bg-indigo flex-1 py-3 text-sm rounded-br-sm" @click="makeRandomPick('longPool')">Long</div>
+            <div
+              :class="(shortPool.length > 0 && canPick) ? enablePickBtn : disablePickBtn"
+              @click="makeRandomPick('shortPool')"
+              class="length--short bg-indigo flex-1 py-3 text-sm rounded-bl-sm">
+                Short
+            </div>
+            <div
+              :class="(longPool.length > 0 && canPick) ? enablePickBtn : disablePickBtn"
+              @click="makeRandomPick('longPool')"
+              class="length--long bg-indigo flex-1 py-3 text-sm rounded-br-sm">
+                Long
+            </div>
           </div>
         </div>
       </template>
+      <div v-if="displayPickPool" class="flex justify-between align-center my-3 relative">
+        <i class="fas fa-filter text-xs text-grey-dark absolute"></i>
+        <input type="text" name="" v-model="pickPoolFilter" class="rounded-sm bg-transparent text-white" placeholder="    Filter">
+        <div class="options__sort">
+          <button type="button" name="button" class="rounded-sm transparent border border-teal text-white px-3 py-1">Sort <i class="fas fa-caret-down ml-1"></i></button>
+        </div>
+      </div>
       <div
         v-for="movie in (displayPickPool ? pickPool : picks)"
         class="user-stack--entry bg-indigo-darker rounded-r-sm px-5 py-3 mb-3">
@@ -104,7 +121,6 @@
           <br>
           EMPTY
       </div>
-
     </template>
   </div>
 </template>
@@ -302,3 +318,9 @@ export default {
   }
 }
 </script>
+<style lang="scss" scoped>
+  .fa-filter {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+</style>
