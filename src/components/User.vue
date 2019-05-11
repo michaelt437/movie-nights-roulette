@@ -11,7 +11,7 @@
           </template>
         </template>
       </h3>
-      <h3 v-else @click="displayPickPool = false" class="hover:text-teal cursor-pointer">
+      <h3 v-else @click="hidePickPool" class="hover:text-teal cursor-pointer">
         <i class="fas fa-arrow-left text-sm"></i> Back
       </h3>
       <p v-if="signedIn && authorizeActions" class="text-sm cursor-pointer hover:text-teal" @click="addMode ? cancelAddPick() : startAddPick()">
@@ -98,11 +98,21 @@
           </div>
         </div>
       </template>
-      <div v-if="displayPickPool" class="flex justify-between align-center my-3 relative">
+      <div v-if="displayPickPool" class="flex align-center my-3 relative">
         <i v-if="pickPoolFilter == ''" class="fas fa-filter text-xs text-grey-dark absolute opacity-50"></i>
-        <input type="text" name="" v-model="pickPoolFilter" class="rounded-sm bg-transparent text-white" placeholder="    Filter">
-        <div class="options__sort">
-          <button type="button" name="button" class="rounded-sm transparent border border-teal text-white px-3 py-1">Sort <i class="fas fa-caret-down ml-1"></i></button>
+        <div class="options__filter flex-shrink">
+          <input type="text" name="" v-model="pickPoolFilter" class="rounded-sm bg-transparent text-white w-full" placeholder="    Filter">
+        </div>
+        <div class="options__sort relative">
+          <button type="button" name="button" class="text-white hover:text-teal" @click.stop="openSortMenu">
+            Sort<span v-show="pickPoolSort != ''">ed by: <span class="text-teal">{{ pickPoolSort }}</span></span> <i class="fas fa-caret-down ml-1"></i>
+          </button>
+          <ul
+            v-show="sortMenuIsOpen"
+            class="list-reset bg-white rounded-sm absolute pin-r py-1 mt-2 w-32">
+            <li v-if="pickPoolSort != ''" class="text-black py-2 px-3 cursor-pointer hover:bg-grey-lighter" @click="setSort('')">Unset</li>
+            <li v-for="sortBy in sortFields" class="text-black py-2 px-3 cursor-pointer hover:bg-grey-lighter" @click="setSort(sortBy)">{{ sortBy }}</li>
+          </ul>
         </div>
       </div>
       <div
@@ -173,7 +183,16 @@ export default {
       displayPickPool: false,
       pickType: '',
       duplicate: false,
-      pickPoolFilter: ''
+      pickPoolFilter: '',
+      sortMenuIsOpen: false,
+      pickPoolSort: '',
+      sortFieldsArr: [
+        'Service',
+        'Runtime Asc',
+        'Runtime Desc',
+        'Title Asc',
+        'Title Desc',
+      ]
     }
   },
   computed: {
@@ -189,6 +208,22 @@ export default {
       return this.allUserMovies.filter(pick => !pick.watched).filter(pick => {
         return pick.title.toLowerCase().includes(this.pickPoolFilter) ||
           pick.service.name.toLowerCase().includes(this.pickPoolFilter)
+      })
+      .sort((pick1, pick2) => {
+        switch(this.pickPoolSort) {
+          case 'Service':
+            return this.sortPicks(pick1.service.name, pick2.service.name)
+          case 'Title Asc':
+            return this.sortPicks(pick1.title.toLowerCase(), pick2.title.toLowerCase())
+          case 'Title Desc':
+            return this.sortPicks(pick2.title.toLowerCase(), pick1.title.toLowerCase())
+          case 'Runtime Asc':
+            return this.sortPicks(parseInt(pick1.duration), parseInt(pick2.duration))
+          case 'Runtime Desc':
+            return this.sortPicks(parseInt(pick2.duration), parseInt(pick1.duration))
+          default:
+            break;
+        }
       })
     },
     shortPool() {
@@ -206,6 +241,9 @@ export default {
     pickableState() {
       return (this.canPick && this.pickPool.length > 0) ? this.enablePickBtn :
         this.userPicked ? this.selectorsChoice : this.disablePickBtn
+    },
+    sortFields() {
+      return this.sortFieldsArr.filter(field => field != this.pickPoolSort)
     }
   },
   methods: {
@@ -304,9 +342,33 @@ export default {
       }else{
         false;
       }
+    },
+    openSortMenu() {
+      this.sortMenuIsOpen = !this.sortMenuIsOpen;
+    },
+    setSort(field) {
+      this.sortMenuIsOpen = false;
+      this.pickPoolSort = field;
+    },
+    hidePickPool() {
+      this.displayPickPool = false;
+      this.pickPoolFilter = '';
+      this.pickPoolSort = '';
+    },
+    sortPicks(a, b) {
+      if(a > b) {
+        return 1;
+      }
+      if(a < b) {
+        return -1;
+      }
+      return 0;
     }
   },
   created() {
+    window.document.addEventListener('click', () => {
+      this.sortMenuIsOpen = false
+    });
     db.collection(this.username)
     .onSnapshot({ includeMetadataChanges: true }, (querySnapshot) => {
       querySnapshot.docChanges().forEach((change) => {
