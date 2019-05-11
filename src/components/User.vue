@@ -99,7 +99,7 @@
         </div>
       </template>
       <div v-if="displayPickPool" class="flex justify-between align-center my-3 relative">
-        <i class="fas fa-filter text-xs text-grey-dark absolute"></i>
+        <i v-if="pickPoolFilter == ''" class="fas fa-filter text-xs text-grey-dark absolute opacity-50"></i>
         <input type="text" name="" v-model="pickPoolFilter" class="rounded-sm bg-transparent text-white" placeholder="    Filter">
         <div class="options__sort">
           <button type="button" name="button" class="rounded-sm transparent border border-teal text-white px-3 py-1">Sort <i class="fas fa-caret-down ml-1"></i></button>
@@ -108,13 +108,16 @@
       <div
         v-for="movie in (displayPickPool ? pickPool : picks)"
         class="user-stack--entry bg-indigo-darker rounded-r-sm px-5 py-3 mb-3">
-        <p class="text-xl capitalize" :title="movie.title">{{ movie.title }}</p>
-        <p class="capitalize my-3" :class="movie.service.value">{{ movie.service.name }}</p>
-        <div class="flex justify-between items-center">
-          <p class="text-xs">{{ movie.duration }} minutes</p>
-          <i v-if="displayPickPool" class="far fa-trash-alt text-red-light text-xs cursor-pointer" title="Trash it" @click="rmPick(movie)"></i>
-          <p v-else class="text-xs">{{ $moment(movie.watchDate).format('MMM D, YYYY') }}</p>
-        </div>
+          <p class="text-xl capitalize" :title="movie.title">{{ movie.title }}</p>
+          <p class="capitalize my-3" :class="movie.service.value">{{ movie.service.name }}</p>
+          <div class="flex justify-between items-center">
+            <p class="text-xs">{{ movie.duration }} minutes</p>
+            <i v-if="displayPickPool" class="far fa-trash-alt text-red-light text-xs cursor-pointer" title="Trash it" @click="rmPick(movie)"></i>
+            <p v-else class="text-xs">{{ $moment(movie.watchDate).format('MMM D, YYYY') }}</p>
+          </div>
+      </div>
+      <div v-if="displayPickPool && pickPool.length == 0" class="opacity-50 bg-transparent border-2 border-white border-dashed rounded-sm px-5 py-3 text-center">
+        No Results
       </div>
       <div v-if="!signedIn && picks.length == 0" class="opacity-50 bg-transparent border-2 border-white border-dashed rounded-sm px-5 py-3 text-center">
           <i class="far fa-frown fa-3x mb-3"></i>
@@ -169,7 +172,8 @@ export default {
       hidePickActions: false,
       displayPickPool: false,
       pickType: '',
-      duplicate: false
+      duplicate: false,
+      pickPoolFilter: ''
     }
   },
   computed: {
@@ -182,7 +186,10 @@ export default {
       return this.allUserMovies.map(pick => pick.title.toLowerCase())
     },
     pickPool() {
-      return this.allUserMovies.filter(pick => !pick.watched)
+      return this.allUserMovies.filter(pick => !pick.watched).filter(pick => {
+        return pick.title.toLowerCase().includes(this.pickPoolFilter) ||
+          pick.service.name.toLowerCase().includes(this.pickPoolFilter)
+      })
     },
     shortPool() {
       return this.pickPool.filter(pick => pick.duration < 106)
