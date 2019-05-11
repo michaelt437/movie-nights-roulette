@@ -187,11 +187,11 @@ export default {
       sortMenuIsOpen: false,
       pickPoolSort: '',
       sortFieldsArr: [
-        'Service',
-        'Runtime Asc',
-        'Runtime Desc',
+        'Shortest',
+        'Longest',
         'Title Asc',
         'Title Desc',
+        'Service',
       ]
     }
   },
@@ -217,9 +217,9 @@ export default {
             return this.sortPicks(pick1.title.toLowerCase(), pick2.title.toLowerCase())
           case 'Title Desc':
             return this.sortPicks(pick2.title.toLowerCase(), pick1.title.toLowerCase())
-          case 'Runtime Asc':
+          case 'Shortest':
             return this.sortPicks(parseInt(pick1.duration), parseInt(pick2.duration))
-          case 'Runtime Desc':
+          case 'Longest':
             return this.sortPicks(parseInt(pick2.duration), parseInt(pick1.duration))
           default:
             break;
