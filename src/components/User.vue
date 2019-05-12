@@ -80,7 +80,7 @@
           class="user-stack--make-pick text-center mb-3">
           <span :class="pickableState" class="random flex justify-between bg-indigo rounded-t-sm border-bottom p-5" @click="makeRandomPick('pickPool')">
             <i class="fas" :class="!userPicked ? 'fa-star' : 'fa-long-arrow-alt-down'"></i>
-            {{!userPicked ? "What's the pick?" : "Tonight's Pick"}}
+            {{!userPicked ? "What's the pick?" : pickedLabel}}
             <i class="fas" :class="!userPicked ? 'fa-star' : 'fa-long-arrow-alt-down'"></i></span>
           <div v-if="!userPicked" class="user-stack--lengths flex">
             <div
@@ -153,6 +153,9 @@ export default {
     userPicked: {
       type: Boolean
     },
+    userPickedDateTime: {
+      type: Number
+    },
     signedIn: {
       type: Boolean,
       required: true
@@ -183,6 +186,7 @@ export default {
       displayPickPool: false,
       pickType: '',
       duplicate: false,
+      pickedLabel: "Tonight's Pick",
       pickPoolFilter: '',
       sortMenuIsOpen: false,
       pickPoolSort: '',
@@ -369,6 +373,11 @@ export default {
     window.document.addEventListener('click', () => {
       this.sortMenuIsOpen = false
     });
+    if(this.userPicked) {
+      if(this.$moment().valueOf() > this.$moment(this.userPickedDateTime).add(1, 'days').startOf('day').valueOf()) {
+        this.pickedLabel = "Last Night's Pick"
+      }
+    }
     db.collection(this.username)
     .onSnapshot({ includeMetadataChanges: true }, (querySnapshot) => {
       querySnapshot.docChanges().forEach((change) => {
