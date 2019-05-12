@@ -186,7 +186,7 @@ export default {
       displayPickPool: false,
       pickType: '',
       duplicate: false,
-      pickedLabel: "Tonight's Pick"
+      pickedLabel: "Tonight's Pick",
       pickPoolFilter: '',
       sortMenuIsOpen: false,
       pickPoolSort: '',
