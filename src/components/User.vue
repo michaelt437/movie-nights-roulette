@@ -291,7 +291,7 @@ export default {
           this.allUserMovies.push(change.doc.data())
         }
         if(change.type === 'modified') {
-          this.allUserMovies = this.allUserMovies.filter(movie => movie.title !== change.doc.data().title)
+          // this.allUserMovies = this.allUserMovies.filter(movie => movie.title !== change.doc.data().title)
         }
         if(change.type === 'removed') {
           console.log('something was deleted!', change.doc.data())
