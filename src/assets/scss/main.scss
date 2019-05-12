@@ -71,6 +71,11 @@ h1 {
   }
 }
 
+.options__sort {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
 .fade-enter-active, .fade-leave-active {
   transition: opacity .5s;
 }

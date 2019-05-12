@@ -11,7 +11,7 @@
           </template>
         </template>
       </h3>
-      <h3 v-else @click="displayPickPool = false" class="hover:text-teal cursor-pointer">
+      <h3 v-else @click="hidePickPool" class="hover:text-teal cursor-pointer">
         <i class="fas fa-arrow-left text-sm"></i> Back
       </h3>
       <p v-if="signedIn && authorizeActions" class="text-sm cursor-pointer hover:text-teal" @click="addMode ? cancelAddPick() : startAddPick()">
@@ -83,28 +83,57 @@
             {{!userPicked ? "What's the pick?" : pickedLabel}}
             <i class="fas" :class="!userPicked ? 'fa-star' : 'fa-long-arrow-alt-down'"></i></span>
           <div v-if="!userPicked" class="user-stack--lengths flex">
-            <div :class="(shortPool.length > 0 && canPick) ? enablePickBtn : disablePickBtn" class="length--short bg-indigo flex-1 py-3 text-sm rounded-bl-sm" @click="makeRandomPick('shortPool')">Short</div>
-            <div :class="(longPool.length > 0 && canPick) ? enablePickBtn : disablePickBtn" class="length--long bg-indigo flex-1 py-3 text-sm rounded-br-sm" @click="makeRandomPick('longPool')">Long</div>
+            <div
+              :class="(shortPool.length > 0 && canPick) ? enablePickBtn : disablePickBtn"
+              @click="makeRandomPick('shortPool')"
+              class="length--short bg-indigo flex-1 py-3 text-sm rounded-bl-sm">
+                Short
+            </div>
+            <div
+              :class="(longPool.length > 0 && canPick) ? enablePickBtn : disablePickBtn"
+              @click="makeRandomPick('longPool')"
+              class="length--long bg-indigo flex-1 py-3 text-sm rounded-br-sm">
+                Long
+            </div>
           </div>
         </div>
       </template>
+      <div v-if="displayPickPool" class="flex align-center my-3 relative">
+        <i v-if="pickPoolFilter == ''" class="fas fa-filter text-xs text-grey-dark absolute opacity-50"></i>
+        <div class="options__filter flex-shrink">
+          <input type="text" name="" v-model="pickPoolFilter" class="rounded-sm bg-transparent text-white w-full" placeholder="    Filter">
+        </div>
+        <div class="options__sort relative">
+          <button type="button" name="button" class="text-white hover:text-teal" @click.stop="openSortMenu">
+            Sort<span v-show="pickPoolSort != ''">ed by: <span class="text-teal">{{ pickPoolSort }}</span></span> <i class="fas fa-caret-down ml-1"></i>
+          </button>
+          <ul
+            v-show="sortMenuIsOpen"
+            class="list-reset bg-white rounded-sm absolute pin-r py-1 mt-2 w-32">
+            <li v-if="pickPoolSort != ''" class="text-black py-2 px-3 cursor-pointer hover:bg-grey-lighter" @click="setSort('')">Unset</li>
+            <li v-for="sortBy in sortFields" class="text-black py-2 px-3 cursor-pointer hover:bg-grey-lighter" @click="setSort(sortBy)">{{ sortBy }}</li>
+          </ul>
+        </div>
+      </div>
       <div
         v-for="movie in (displayPickPool ? pickPool : picks)"
         class="user-stack--entry bg-indigo-darker rounded-r-sm px-5 py-3 mb-3">
-        <p class="text-xl capitalize" :title="movie.title">{{ movie.title }}</p>
-        <p class="capitalize my-3" :class="movie.service.value">{{ movie.service.name }}</p>
-        <div class="flex justify-between items-center">
-          <p class="text-xs">{{ movie.duration }} minutes</p>
-          <i v-if="displayPickPool" class="far fa-trash-alt text-red-light text-xs cursor-pointer" title="Trash it" @click="rmPick(movie)"></i>
-          <p v-else class="text-xs">{{ $moment(movie.watchDate).format('MMM D, YYYY') }}</p>
-        </div>
+          <p class="text-xl capitalize" :title="movie.title">{{ movie.title }}</p>
+          <p class="capitalize my-3" :class="movie.service.value">{{ movie.service.name }}</p>
+          <div class="flex justify-between items-center">
+            <p class="text-xs">{{ movie.duration }} minutes</p>
+            <i v-if="displayPickPool" class="far fa-trash-alt text-red-light text-xs cursor-pointer" title="Trash it" @click="rmPick(movie)"></i>
+            <p v-else class="text-xs">{{ $moment(movie.watchDate).format('MMM D, YYYY') }}</p>
+          </div>
+      </div>
+      <div v-if="displayPickPool && pickPool.length == 0" class="opacity-50 bg-transparent border-2 border-white border-dashed rounded-sm px-5 py-3 text-center">
+        No Results
       </div>
       <div v-if="!signedIn && picks.length == 0" class="opacity-50 bg-transparent border-2 border-white border-dashed rounded-sm px-5 py-3 text-center">
           <i class="far fa-frown fa-3x mb-3"></i>
           <br>
           EMPTY
       </div>
-
     </template>
   </div>
 </template>
@@ -158,6 +187,16 @@ export default {
       pickType: '',
       duplicate: false,
       pickedLabel: "Tonight's Pick"
+      pickPoolFilter: '',
+      sortMenuIsOpen: false,
+      pickPoolSort: '',
+      sortFieldsArr: [
+        'Shortest',
+        'Longest',
+        'Title Asc',
+        'Title Desc',
+        'Service',
+      ]
     }
   },
   computed: {
@@ -170,7 +209,26 @@ export default {
       return this.allUserMovies.map(pick => pick.title.toLowerCase())
     },
     pickPool() {
-      return this.allUserMovies.filter(pick => !pick.watched)
+      return this.allUserMovies.filter(pick => !pick.watched).filter(pick => {
+        return pick.title.toLowerCase().includes(this.pickPoolFilter) ||
+          pick.service.name.toLowerCase().includes(this.pickPoolFilter)
+      })
+      .sort((pick1, pick2) => {
+        switch(this.pickPoolSort) {
+          case 'Service':
+            return this.sortPicks(pick1.service.name, pick2.service.name)
+          case 'Title Asc':
+            return this.sortPicks(pick1.title.toLowerCase(), pick2.title.toLowerCase())
+          case 'Title Desc':
+            return this.sortPicks(pick2.title.toLowerCase(), pick1.title.toLowerCase())
+          case 'Shortest':
+            return this.sortPicks(parseInt(pick1.duration), parseInt(pick2.duration))
+          case 'Longest':
+            return this.sortPicks(parseInt(pick2.duration), parseInt(pick1.duration))
+          default:
+            break;
+        }
+      })
     },
     shortPool() {
       return this.pickPool.filter(pick => pick.duration < 106)
@@ -188,6 +246,9 @@ export default {
       return (this.canPick && this.pickPool.length > 0) ? this.enablePickBtn :
         this.userPicked ? this.selectorsChoice : this.disablePickBtn
     },
+    sortFields() {
+      return this.sortFieldsArr.filter(field => field != this.pickPoolSort)
+    }
   },
   methods: {
     startAddPick() {
@@ -285,9 +346,33 @@ export default {
       }else{
         false;
       }
+    },
+    openSortMenu() {
+      this.sortMenuIsOpen = !this.sortMenuIsOpen;
+    },
+    setSort(field) {
+      this.sortMenuIsOpen = false;
+      this.pickPoolSort = field;
+    },
+    hidePickPool() {
+      this.displayPickPool = false;
+      this.pickPoolFilter = '';
+      this.pickPoolSort = '';
+    },
+    sortPicks(a, b) {
+      if(a > b) {
+        return 1;
+      }
+      if(a < b) {
+        return -1;
+      }
+      return 0;
     }
   },
   created() {
+    window.document.addEventListener('click', () => {
+      this.sortMenuIsOpen = false
+    });
     if(this.userPicked) {
       if(this.$moment().valueOf() > this.$moment(this.userPickedDateTime).add(1, 'days').startOf('day').valueOf()) {
         this.pickedLabel = "Last Night's Pick"
@@ -311,3 +396,9 @@ export default {
   }
 }
 </script>
+<style lang="scss" scoped>
+  .fa-filter {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+</style>
