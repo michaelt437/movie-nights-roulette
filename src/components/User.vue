@@ -80,7 +80,7 @@
           class="user-stack--make-pick text-center mb-3">
           <span :class="pickableState" class="random flex justify-between bg-indigo rounded-t-sm border-bottom p-5" @click="makeRandomPick('pickPool')">
             <i class="fas" :class="!userPicked ? 'fa-star' : 'fa-long-arrow-alt-down'"></i>
-            {{!userPicked ? "What's the pick?" : "Tonight's Pick"}}
+            {{!userPicked ? "What's the pick?" : pickedLabel}}
             <i class="fas" :class="!userPicked ? 'fa-star' : 'fa-long-arrow-alt-down'"></i></span>
           <div v-if="!userPicked" class="user-stack--lengths flex">
             <div :class="(shortPool.length > 0 && canPick) ? enablePickBtn : disablePickBtn" class="length--short bg-indigo flex-1 py-3 text-sm rounded-bl-sm" @click="makeRandomPick('shortPool')">Short</div>
@@ -124,6 +124,9 @@ export default {
     userPicked: {
       type: Boolean
     },
+    userPickedDateTime: {
+      type: Number
+    },
     signedIn: {
       type: Boolean,
       required: true
@@ -153,7 +156,8 @@ export default {
       hidePickActions: false,
       displayPickPool: false,
       pickType: '',
-      duplicate: false
+      duplicate: false,
+      pickedLabel: "Tonight's Pick"
     }
   },
   computed: {
@@ -183,7 +187,7 @@ export default {
     pickableState() {
       return (this.canPick && this.pickPool.length > 0) ? this.enablePickBtn :
         this.userPicked ? this.selectorsChoice : this.disablePickBtn
-    }
+    },
   },
   methods: {
     startAddPick() {
@@ -284,6 +288,11 @@ export default {
     }
   },
   created() {
+    if(this.userPicked) {
+      if(this.$moment().valueOf() > this.$moment(this.userPickedDateTime).add(1, 'days').startOf('day').valueOf()) {
+        this.pickedLabel = "Last Night's Pick"
+      }
+    }
     db.collection(this.username)
     .onSnapshot({ includeMetadataChanges: true }, (querySnapshot) => {
       querySnapshot.docChanges().forEach((change) => {

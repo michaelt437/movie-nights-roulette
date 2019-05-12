@@ -26,6 +26,7 @@
         :key="user.name"
         :username="user.name"
         :userPicked.sync="user.pickedTonight"
+        :userPickedDateTime="user.pickedDateTime"
         :canPick="canPick"
         :signedIn="signedIn"
         :authorizeActions="user.email == userEmail"
@@ -109,7 +110,7 @@ export default {
     init.then((value) => {
       setTimeout(() => {
         if(!this.canPick) {
-          if((new this.$moment().valueOf()) > this.$moment(this.lastPicker.pickedDateTime).add(1, 'days').hours(12).valueOf()) {
+          if((new this.$moment().valueOf()) > this.$moment(this.lastPicker.pickedDateTime).add(1, 'days').hours(10).valueOf()) {
             db.collection('users')
             .doc(this.lastPicker.name)
             .update({
