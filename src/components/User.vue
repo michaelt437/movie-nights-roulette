@@ -68,7 +68,9 @@
               <p v-if="userPicked" class="text-xs">{{ $moment(pendingSelectedMovie.watchDate).format('MMM D, YYYY') }}</p>
             </div>
           </div>
-          <div class="mb-3 flex justify-end" v-show="!hidePickActions">
+          <div class="mb-3 flex items-center" v-show="!hidePickActions">
+            <p class="ma-0 pl-2 text-sm" :class="reRollColor" v-show="reRolls > 0">{{ reRolls }} chances left!</p>
+            <span class="flex-grow"></span>
             <button v-if="allUserMovies.length > 1" class="text-sm bg-transparent mr-1 rounded-full text-white p-2" title="Re-roll" type="button" name="button" @click="makeRandomPick('pickPool')"><i class="fas fa-dice"></i></button>
             <button class="text-sm bg-transparent rounded-full text-white p-2" title="Hmm, nah..." type="button" name="button" @click="cancelMakePick"><i class="fas fa-times"></i></button>
             <button class="text-sm bg-transparent rounded-full text-teal p-2" title="Yes!" type="button" name="button" @click="confirmPick"><i class="fas" :class="canPick ? 'fa-check' : 'fa-thumbs-up'"></i></button>
@@ -162,6 +164,9 @@ export default {
     },
     authorizeActions: {
       type: Boolean
+    },
+    reRolls: {
+      type: Number,
     }
   },
   data() {
@@ -248,6 +253,18 @@ export default {
     },
     sortFields() {
       return this.sortFieldsArr.filter(field => field != this.pickPoolSort)
+    },
+    reRollColor() {
+      switch(this.reRolls) {
+        case 3:
+          return 'text-green'
+        case 2:
+          return 'text-orange'
+        case 1:
+          return 'text-red'
+        default:
+          return
+      }
     }
   },
   methods: {
@@ -292,14 +309,21 @@ export default {
     makeRandomPick(type) {
       this.pickType = type;
       if(this.canPick) {
-        if(this[type].length > 0) {
-          this.pendingPick = true;
-          this.prevRandomSelection = this.randomSelection;
-          let temp = Math.floor(Math.random() * this[type].length);
-          while(temp === this.prevRandomSelection) {
-            temp = Math.floor(Math.random() * this[type].length);
-          }
-          this.randomSelection = temp;
+        this.pendingPick = true;
+        this.prevRandomSelection = this.randomSelection;
+        let temp = Math.floor(Math.random() * this[type].length);
+        while(temp === this.prevRandomSelection) {
+          temp = Math.floor(Math.random() * this[type].length);
+        }
+        this.randomSelection = temp;
+        this.$emit('update:reRolls', this.reRolls - 1)
+        db.collection('users')
+        .doc(this.username)
+        .update({
+          reRolls: fb.firestore.FieldValue.increment(-1)
+        })
+        if(this.reRolls == 1) {
+          this.confirmPick();
         }
       }
     },
