@@ -68,10 +68,8 @@
               <p v-if="userPicked" class="text-xs">{{ $moment(pendingSelectedMovie.watchDate).format('MMM D, YYYY') }}</p>
             </div>
           </div>
-          <div class="mb-3 flex items-center" v-show="!hidePickActions">
-            <p class="ma-0 pl-2 text-sm" :class="reRollColor" v-show="reRolls > 0">{{ reRolls }} chances left!</p>
-            <span class="flex-grow"></span>
-            <button v-if="allUserMovies.length > 1" class="text-sm bg-transparent mr-1 rounded-full text-white p-2" title="Re-roll" type="button" name="button" @click="makeRandomPick('pickPool')"><i class="fas fa-dice"></i></button>
+          <div class="mb-3 flex items-center justify-end" v-show="!hidePickActions">
+            <button v-if="allUserMovies.length > 1 && reRolls > 0" class="text-sm bg-transparent mr-1 rounded-full p-2" :class="reRollColor" title="Re-roll" type="button" name="button" @click="makeRandomPick('pickPool')"><i class="fas fa-dice"></i> ({{reRolls}})</button>
             <button class="text-sm bg-transparent rounded-full text-white p-2" title="Hmm, nah..." type="button" name="button" @click="cancelMakePick"><i class="fas fa-times"></i></button>
             <button class="text-sm bg-transparent rounded-full text-teal p-2" title="Yes!" type="button" name="button" @click="confirmPick"><i class="fas" :class="canPick ? 'fa-check' : 'fa-thumbs-up'"></i></button>
           </div>
