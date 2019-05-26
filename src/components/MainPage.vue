@@ -30,6 +30,7 @@
         :canPick="canPick"
         :signedIn="signedIn"
         :authorizeActions="user.email == userEmail"
+        :reRolls.sync="user.reRolls"
         ></User>
       </template>
       <AddUser v-if="signedIn && !userExists"></AddUser>
@@ -114,7 +115,8 @@ export default {
             db.collection('users')
             .doc(this.lastPicker.name)
             .update({
-              pickedTonight: false
+              pickedTonight: false,
+              reRolls: 4
             })
           }else{
             console.log('hello darkness, my old friend...')
