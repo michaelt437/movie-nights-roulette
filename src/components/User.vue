@@ -19,36 +19,36 @@
       </p>
     </div>
     <template v-if="addMode">
-      <div class="border-dashed border-2 rounded-sm text-white py-5 px-8 relative" :class="{'addSuccess' : success}">
+      <div class="border-dashed border-2 rounded-sm py-5 px-8 relative" :class="{'addSuccess' : success}">
         <h4 class="text-lg text-center italic">Add a Pick</h4>
-        <hr class="my-5 border border-teal-dark border-solid">
-        <p class="mb-2">Movie Title <span v-if="duplicate" class="text-pink-dark italic">- already exists</span></p>
+        <hr class="my-5 border border-teal-600 border-solid">
+        <p class="mb-2">Movie Title <span v-if="duplicate" class="text-red-600 italic">- already exists</span></p>
         <input
           v-model="movieTitle"
           :placeholder="placeholderMovie"
-          class="mb-4 rounded-sm p-3 min-w-full"
+          class="mb-4 rounded-sm p-3 min-w-full text-gray-700"
           type="text"
           name="title" />
         <p class="mb-2">Duration (minutes)</p>
         <input
           v-model="duration"
           placeholder="90"
-          class="mb-4 rounded-sm p-3 min-w-full"
+          class="mb-4 rounded-sm p-3 min-w-full text-gray-700"
           type="text"
           name="duration" />
         <p class="mb-2">Service</p>
-        <select class="rounded-sm p-3 min-w-full" name="service" v-model="selectedService">
+        <select class="rounded-sm p-3 min-w-full text-gray-700" name="service" v-model="selectedService">
           <option value="" selected disabled hidden>watchmovies123.com</option>
           <option v-for="(service, i) in streamingService" :value="streamingService[i]">{{ service.name }}</option>
         </select>
-        <hr class="my-5 border border-teal-dark border-solid">
+        <hr class="my-5 border border-teal-600 border-solid">
         <div class="text-white flex flex-row justify-between">
-          <button class="flex-1 mr-3 px-3 py-2 bg-transparent border-solid border-white border rounded-sm text-white" type="button" name="button" @click="cancelAddPick">Back</button>
+          <button class="flex-1 mr-3 px-3 py-2 bg-transparent border-solid border-white hover:border-teal-500 hover:text-teal-500 border rounded-sm text-white" type="button" name="button" @click="cancelAddPick">Back</button>
           <!-- :class="{'opacity-50 cursor-default' : disableAddPick }"
           :disabled="disableAddPick" -->
           <button
             @click="addPickToPool"
-            class="flex-1 px-3 py-2 bg-teal-dark border-teal-dark border rounded-sm text-white" type="button" name="button">
+            class="flex-1 px-3 py-2 bg-teal-600 border-teal-600 hover:border-teal-700 hover:bg-teal-700 border rounded-sm text-white" type="button" name="button">
               Add
             </button>
         </div>
