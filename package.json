@@ -20,7 +20,7 @@
     "@vue/cli-service": "^3.6.0",
     "node-sass": "^4.9.0",
     "sass-loader": "^7.1.0",
-    "tailwindcss": "^0.7.4",
+    "tailwindcss": "^1.0.4",
     "vue-template-compiler": "^2.5.21"
   }
 }

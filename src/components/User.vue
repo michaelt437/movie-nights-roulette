@@ -1,20 +1,20 @@
 <template>
   <div class="user-stack flex flex-col mx-5 mb-10">
     <div class="flex justify-between items-center mb-4">
-      <h3 v-if="!displayPickPool" class="capitalize">{{ username }}
+      <h3 v-if="!displayPickPool" class="font-bold capitalize">{{ username }}
         <template v-if="signedIn">
           <template v-if="authorizeActions && !addMode">
-            - <a href="#" @click.prevent="showPickPool" class="cursor-pointer text-teal no-underline">{{ pickPool.length }}</a>
+            - <a href="#" @click.prevent="showPickPool" class="cursor-pointer text-teal-500 no-underline">{{ pickPool.length }}</a>
           </template>
           <template v-else>
             - {{pickPool.length}}
           </template>
         </template>
       </h3>
-      <h3 v-else @click="hidePickPool" class="hover:text-teal cursor-pointer">
+      <h3 v-else @click="hidePickPool" class="hover:text-teal-500 cursor-pointer">
         <i class="fas fa-arrow-left text-sm"></i> Back
       </h3>
-      <p v-if="signedIn && authorizeActions" class="text-sm cursor-pointer hover:text-teal" @click="addMode ? cancelAddPick() : startAddPick()">
+      <p v-if="signedIn && authorizeActions" class="text-sm cursor-pointer hover:text-teal-500" @click="addMode ? cancelAddPick() : startAddPick()">
         <i class="fas mr-1" :class="addMode ? 'fa-times' : 'fa-plus-circle'"></i> {{ addMode ? '' : 'Add a pick'}}
       </p>
     </div>
@@ -60,7 +60,7 @@
           <div
             key="thePicked"
             :class="{'animate-select' : selectConfirm, 'mb-3' : hidePickActions }"
-            class="user-stack--entry bg-indigo-darker rounded-r-sm  px-5 py-3">
+            class="user-stack--entry bg-gray-800 rounded-r-sm  px-5 py-3">
             <p class="text-xl capitalize" :title="pendingSelectedMovie.title">{{ pendingSelectedMovie.title }}</p>
             <p class="capitalize my-3" :class="pendingSelectedMovie.service.value">{{ pendingSelectedMovie.service.name }}</p>
             <div class="flex justify-between">
@@ -71,14 +71,14 @@
           <div class="mb-3 flex items-center justify-end" v-show="!hidePickActions">
             <button v-if="allUserMovies.length > 1 && reRolls > 0" class="text-sm bg-transparent rounded-full p-2" :class="reRollColor" title="Re-roll" type="button" name="button" @click="makeRandomPick('pickPool')"><i class="fas fa-dice"></i> ({{reRolls}})</button>
             <button class="text-sm bg-transparent rounded-full text-white p-2" title="Hmm, nah..." type="button" name="button" @click="cancelMakePick"><i class="fas fa-times"></i></button>
-            <button class="text-sm bg-transparent rounded-full text-teal p-2" title="Yes!" type="button" name="button" @click="confirmPick"><i class="fas" :class="canPick ? 'fa-check' : 'fa-thumbs-up'"></i></button>
+            <button class="text-sm bg-transparent rounded-full text-teal-500 p-2" title="Yes!" type="button" name="button" @click="confirmPick"><i class="fas" :class="canPick ? 'fa-check' : 'fa-thumbs-up'"></i></button>
           </div>
         </template>
         <div
           v-else
           key="ticket"
           class="user-stack--make-pick text-center mb-3">
-          <span :class="pickableState" class="random flex justify-between bg-indigo rounded-t-sm border-bottom p-5" @click="makeRandomPick('pickPool')">
+          <span :class="pickableState" class="random flex justify-between items-center bg-indigo-600 rounded-t-sm border-bottom p-5" @click="makeRandomPick('pickPool')">
             <i class="fas" :class="!userPicked ? 'fa-star' : 'fa-long-arrow-alt-down'"></i>
             {{!userPicked ? "What's the pick?" : pickedLabel}}
             <i class="fas" :class="!userPicked ? 'fa-star' : 'fa-long-arrow-alt-down'"></i></span>
@@ -86,43 +86,43 @@
             <div
               :class="(shortPool.length > 0 && canPick) ? enablePickBtn : disablePickBtn"
               @click="makeRandomPick('shortPool')"
-              class="length--short bg-indigo flex-1 py-3 text-sm rounded-bl-sm">
+              class="length--short bg-indigo-600 flex-1 py-3 text-sm rounded-bl-sm">
                 Short
             </div>
             <div
               :class="(longPool.length > 0 && canPick) ? enablePickBtn : disablePickBtn"
               @click="makeRandomPick('longPool')"
-              class="length--long bg-indigo flex-1 py-3 text-sm rounded-br-sm">
+              class="length--long bg-indigo-600 flex-1 py-3 text-sm rounded-br-sm">
                 Long
             </div>
           </div>
         </div>
       </template>
       <div v-if="displayPickPool" class="flex align-center my-3 relative">
-        <i v-if="pickPoolFilter == ''" class="fas fa-filter text-xs text-grey-dark absolute opacity-50"></i>
+        <i v-if="pickPoolFilter == ''" class="fas fa-filter text-xs text-gray-400 absolute opacity-50"></i>
         <div class="options__filter flex-shrink">
           <input type="text" name="" v-model="pickPoolFilter" class="rounded-sm bg-transparent text-white w-full" placeholder="    Filter">
         </div>
         <div class="options__sort relative">
-          <button type="button" name="button" class="text-white hover:text-teal" @click.stop="openSortMenu">
-            Sort<span v-show="pickPoolSort != ''">ed by: <span class="text-teal">{{ pickPoolSort }}</span></span> <i class="fas fa-caret-down ml-1"></i>
+          <button type="button" name="button" class="text-white hover:text-teal-500" @click.stop="openSortMenu">
+            Sort<span v-show="pickPoolSort != ''">ed by: <span class="text-teal-500">{{ pickPoolSort }}</span></span> <i class="fas fa-caret-down ml-1"></i>
           </button>
           <ul
             v-show="sortMenuIsOpen"
-            class="list-reset bg-white rounded-sm absolute pin-r py-1 mt-2 w-32">
-            <li v-if="pickPoolSort != ''" class="text-black py-2 px-3 cursor-pointer hover:bg-grey-lighter" @click="setSort('')">Unset</li>
-            <li v-for="sortBy in sortFields" class="text-black py-2 px-3 cursor-pointer hover:bg-grey-lighter" @click="setSort(sortBy)">{{ sortBy }}</li>
+            class="list-reset bg-white rounded-sm absolute right-0 py-1 mt-2 w-32">
+            <li v-if="pickPoolSort != ''" class="text-black py-2 px-3 cursor-pointer hover:bg-gray-300" @click="setSort('')">Unset</li>
+            <li v-for="sortBy in sortFields" class="text-black py-2 px-3 cursor-pointer hover:bg-gray-300" @click="setSort(sortBy)">{{ sortBy }}</li>
           </ul>
         </div>
       </div>
       <div
         v-for="movie in (displayPickPool ? pickPool : picks)"
-        class="user-stack--entry bg-indigo-darker rounded-r-sm px-5 py-3 mb-3">
+        class="user-stack--entry bg-gray-800 rounded-r-sm px-5 py-3 mb-3">
           <p class="text-xl capitalize" :title="movie.title">{{ movie.title }}</p>
           <p class="capitalize my-3" :class="movie.service.value">{{ movie.service.name }}</p>
           <div class="flex justify-between items-center">
             <p class="text-xs">{{ movie.duration }} minutes</p>
-            <i v-if="displayPickPool" class="far fa-trash-alt text-red-light text-xs cursor-pointer" title="Trash it" @click="rmPick(movie)"></i>
+            <i v-if="displayPickPool" class="far fa-trash-alt text-red-600 text-xs cursor-pointer" title="Trash it" @click="rmPick(movie)"></i>
             <p v-else class="text-xs">{{ $moment(movie.watchDate).format('MMM D, YYYY') }}</p>
           </div>
       </div>
@@ -180,9 +180,9 @@ export default {
       selectedService: '',
       prevRandomSelection: '',
       randomSelection: '',
-      enablePickBtn: 'cursor-pointer hover:bg-indigo-dark',
+      enablePickBtn: 'cursor-pointer hover:bg-indigo-700',
       disablePickBtn: 'opacity-50 cursor-default',
-      selectorsChoice: 'cursor-default text-yellow',
+      selectorsChoice: 'cursor-default text-yellow-500',
       success: false,
       selectConfirm: false,
       hidePickActions: false,
@@ -255,11 +255,11 @@ export default {
     reRollColor() {
       switch(this.reRolls) {
         case 3:
-          return 'text-green'
+          return 'text-green-500'
         case 2:
-          return 'text-orange'
+          return 'text-orange-500'
         case 1:
-          return 'text-red'
+          return 'text-red-500'
         default:
           return
       }
