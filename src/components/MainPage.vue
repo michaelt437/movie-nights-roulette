@@ -110,18 +110,26 @@ export default {
 
     init.then((value) => {
       setTimeout(() => {
-        if(!this.canPick) {
+        if(!this.canPick){
           if((new this.$moment().valueOf()) > this.$moment(this.lastPicker.pickedDateTime).add(1, 'days').hours(10).valueOf()) {
             db.collection('users')
             .doc(this.lastPicker.name)
             .update({
               pickedTonight: false,
-              reRolls: 4
             })
           }else{
             console.log('hello darkness, my old friend...')
           }
         }
+        this.usersArr.forEach(user => {
+          if(user.reRolls < 4){
+            db.collection('users')
+            .doc(user.name)
+            .update({
+              reRolls: 4
+            })
+          }
+        })
       }, 2000)
     });
 
