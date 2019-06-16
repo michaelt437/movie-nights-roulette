@@ -1,6 +1,6 @@
 <template>
   <div class="user-stack flex flex-col mx-5 mb-10">
-    <div class="flex justify-between items-center mb-4">
+    <div class="flex justify-between items-center">
       <h3 v-if="!displayPickPool" class="font-bold capitalize">{{ username }}
         <template v-if="signedIn">
           <template v-if="authorizeActions && !addMode">
@@ -17,6 +17,20 @@
       <p v-if="signedIn && authorizeActions" class="text-sm cursor-pointer hover:text-teal-500" @click="addMode ? cancelAddPick() : startAddPick()">
         <i class="fas mr-1" :class="addMode ? 'fa-times' : 'fa-plus-circle'"></i> {{ addMode ? '' : 'Add a pick'}}
       </p>
+    </div>
+    <hr class="border-t border-solid border-gray-600 w-full my-4">
+    <div v-if="!displayPickPool && !addMode" class="flex align-center mb-3 relative">
+      <div class="relative">
+        <button type="button" name="button" class="text-white text-sm" :class="pendingPick ? 'cursor-default' : 'hover:text-teal-500'" @click.stop="pendingPick ? null : openPickFromServiceMenu()">
+          Pick from: <span class="text-teal-500">{{ pickFromService == '' ? 'All' : pickFromService }}</span></span> <i v-show="!pendingPick" class="fas fa-caret-down ml-1"></i>
+        </button>
+        <ul
+          v-show="pickFromServiceMenuOpen"
+          class="list-reset bg-white rounded-sm absolute left-0 py-1 mt-2 w-32 z-10">
+          <li v-if="pickFromService != ''" class="text-black py-2 px-3 cursor-pointer hover:bg-gray-300" @click="setPickFromService('')">All</li>
+          <li v-for="service in availableService" class="text-black py-2 px-3 cursor-pointer hover:bg-gray-300" @click="setPickFromService(service)">{{ service }}</li>
+        </ul>
+      </div>
     </div>
     <template v-if="addMode">
       <div class="border-dashed border-2 rounded-sm py-5 px-8 relative" :class="{'addSuccess' : success}">
@@ -85,13 +99,13 @@
           <div v-if="!userPicked" class="user-stack--lengths flex">
             <div
               :class="(shortPool.length > 0 && canPick) ? enablePickBtn : disablePickBtn"
-              @click="makeRandomPick('shortPool')"
+              @click="(shortPool.length > 0) ? makeRandomPick('shortPool') : null"
               class="length--short bg-indigo-600 flex-1 py-3 text-sm rounded-bl-sm">
                 Short
             </div>
             <div
               :class="(longPool.length > 0 && canPick) ? enablePickBtn : disablePickBtn"
-              @click="makeRandomPick('longPool')"
+              @click="(longPool.length > 0) ? makeRandomPick('longPool') : null"
               class="length--long bg-indigo-600 flex-1 py-3 text-sm rounded-br-sm">
                 Long
             </div>
@@ -199,7 +213,9 @@ export default {
         'Title Asc',
         'Title Desc',
         'Service',
-      ]
+      ],
+      pickFromService: '',
+      pickFromServiceMenuOpen: false
     }
   },
   computed: {
@@ -234,16 +250,16 @@ export default {
       })
     },
     shortPool() {
-      return this.pickPool.filter(pick => pick.duration < 106)
+      return this.pickPool.filter(pick => pick.duration < 106 && pick.service.name.includes(this.pickFromService))
     },
     longPool() {
-      return this.pickPool.filter(pick => pick.duration >= 106)
+      return this.pickPool.filter(pick => pick.duration >= 106 && pick.service.name.includes(this.pickFromService))
     },
     disableAddPick() {
       return this.movieTitle == '' || this.duration == '' || this.selectedService == '';
     },
     pendingSelectedMovie() {
-      return this[this.pickType][this.randomSelection] || null;
+      return this[this.pickType].filter(pick => pick.service.name.includes(this.pickFromService))[this.randomSelection] || null;
     },
     pickableState() {
       return (this.canPick && this.pickPool.length > 0) ? this.enablePickBtn :
@@ -263,12 +279,22 @@ export default {
         default:
           return
       }
+    },
+    availableService() {
+      let availableService = [];
+      this.pickPool.forEach(pick => {
+        if(!availableService.includes(pick.service.name)){
+          availableService.push(pick.service.name)
+        }
+      })
+      return availableService;
     }
   },
   methods: {
     startAddPick() {
       this.addMode = true;
       this.displayPickPool = false;
+      this.pickFromService = '';
       this.randomizeMovie();
     },
     cancelAddPick() {
@@ -309,9 +335,9 @@ export default {
       if(this.canPick) {
         this.pendingPick = true;
         this.prevRandomSelection = this.randomSelection;
-        let temp = Math.floor(Math.random() * this[type].length);
+        let temp = Math.floor(Math.random() * this[type].filter(pick => pick.service.name.includes(this.pickFromService)).length);
         while(temp === this.prevRandomSelection) {
-          temp = Math.floor(Math.random() * this[type].length);
+          temp = Math.floor(Math.random() * this[type].filter(pick => pick.service.name.includes(this.pickFromService)).length);
         }
         this.randomSelection = temp;
         this.$emit('update:reRolls', this.reRolls - 1)
@@ -357,7 +383,8 @@ export default {
       });
     },
     showPickPool() {
-      this.displayPickPool = true
+      this.displayPickPool = true;
+      this.pickFromService = '';
     },
     rmPick(pick) {
       const confirm = window.confirm("Are you sure you want to remove this pick?");
@@ -380,6 +407,7 @@ export default {
       this.displayPickPool = false;
       this.pickPoolFilter = '';
       this.pickPoolSort = '';
+      this.pickFromService = '';
     },
     sortPicks(a, b) {
       if(a > b) {
@@ -389,11 +417,18 @@ export default {
         return -1;
       }
       return 0;
+    },
+    openPickFromServiceMenu() {
+      this.pickFromServiceMenuOpen = !this.pickFromServiceMenuOpen;
+    },
+    setPickFromService(service) {
+      this.pickFromService = service;
     }
   },
   created() {
     window.document.addEventListener('click', () => {
-      this.sortMenuIsOpen = false
+      this.sortMenuIsOpen = false;
+      this.pickFromServiceMenuOpen = false;
     });
     if(this.userPicked) {
       if(this.$moment().valueOf() > this.$moment(this.userPickedDateTime).add(1, 'days').startOf('day').valueOf()) {
