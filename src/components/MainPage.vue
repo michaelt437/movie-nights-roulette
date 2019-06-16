@@ -5,13 +5,13 @@
 
       </div>
       <div class="flex flex-1 justify-center">
-        <h1 class="text-center">Movie Nights Roulette</h1>
+        <h1 class="text-center text-4xl font-bold">Movie Nights Roulette</h1>
       </div>
       <div class="flex flex-1 justify-end items-center">
-        <a v-if="!signedIn" href="#" @click.prevent="login" class="text-white hover:text-teal no-underline">Join the Roulette</a>
+        <a v-if="!signedIn" href="#" @click.prevent="login" class="text-white hover:text-teal-500 no-underline">Join the Roulette</a>
         <button
         @click="userAuth"
-        :class="signedIn ? 'bg-pink-dark hover:bg-pink' : 'bg-teal-dark hover:bg-teal'"
+        :class="signedIn ? 'bg-pink-600 hover:bg-pink-700' : 'bg-teal-500 hover:bg-teal-600'"
         class="text-white px-3 py-2 rounded-sm ml-5"
         type="button"
         name="button">
