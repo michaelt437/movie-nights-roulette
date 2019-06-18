@@ -19,7 +19,7 @@
       </p>
     </div>
     <hr class="border-t border-solid border-gray-600 w-full my-4">
-    <div v-if="!displayPickPool && !addMode" class="flex align-center mb-3 relative">
+    <div v-if="signedIn && !displayPickPool && !addMode" class="flex align-center mb-3 relative">
       <div class="relative">
         <button type="button" name="button" class="text-white text-sm" :class="pendingPick ? 'cursor-default' : 'hover:text-teal-500'" @click.stop="pendingPick ? null : openPickFromServiceMenu()">
           Pick from: <span class="text-teal-500">{{ pickFromService == '' ? 'All' : pickFromService }}</span></span> <i v-show="!pendingPick" class="fas fa-caret-down ml-1"></i>
