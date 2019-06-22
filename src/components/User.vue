@@ -1,6 +1,6 @@
 <template>
   <div class="user-stack flex flex-col mx-5 mb-10">
-    <div class="flex justify-between items-center">
+    <div class="flex justify-between items-center mb-3">
       <h3 v-if="!displayPickPool" class="font-bold capitalize">{{ username }}
         <template v-if="signedIn">
           <template v-if="authorizeActions && !addMode">
@@ -18,17 +18,27 @@
         <i class="fas mr-1" :class="addMode ? 'fa-times' : 'fa-plus-circle'"></i> {{ addMode ? '' : 'Add a pick'}}
       </p>
     </div>
-    <hr class="border-t border-solid border-gray-600 w-full my-4">
-    <div v-if="signedIn && !displayPickPool && !addMode" class="flex align-center mb-3 relative">
-      <div class="relative">
-        <button type="button" name="button" class="text-white text-sm" :class="pendingPick ? 'cursor-default' : 'hover:text-teal-500'" @click.stop="pendingPick ? null : openPickFromServiceMenu()">
-          Pick from: <span class="text-teal-500">{{ pickFromService == '' ? 'All' : pickFromService }}</span></span> <i v-show="!pendingPick" class="fas fa-caret-down ml-1"></i>
+    <div v-if="signedIn && !displayPickPool && !addMode" class="flex align-center mb-3 relative flex-wrap">
+      <hr class="border-t border-solid border-gray-600 mb-4 w-full">
+      <div class="relative mr-4">
+        <button type="button" name="button" class="text-white text-sm" :class="'hover:text-teal-500'" @click.stop="openPickFromServiceMenu()">
+          Pick from: <span class="text-teal-500">{{ pickFromService == '' ? 'All' : pickFromService }}</span></span> <i class="fas fa-caret-down ml-1"></i>
         </button>
         <ul
-          v-show="pickFromServiceMenuOpen"
+          v-show="pickFromServiceMenuIsOpen"
           class="list-reset bg-white rounded-sm absolute left-0 py-1 mt-2 w-32 z-10">
           <li v-if="pickFromService != ''" class="text-black py-2 px-3 cursor-pointer hover:bg-gray-300" @click="setPickFromService('')">All</li>
           <li v-for="service in availableService" class="text-black py-2 px-3 cursor-pointer hover:bg-gray-300" @click="setPickFromService(service)">{{ service }}</li>
+        </ul>
+      </div>
+      <div class="relative">
+        <button type="button" name="button" class="text-white text-sm" :class="'hover:text-teal-500'" @click.stop="openPickLengthMenu()">
+          Length: <span class="text-teal-500 capitalize">{{ pickFromPool.name }}</span></span> <i class="fas fa-caret-down ml-1"></i>
+        </button>
+        <ul
+          v-show="pickFromPoolMenuIsOpen"
+          class="list-reset bg-white rounded-sm absolute left-0 py-1 mt-2 w-32 z-10">
+          <li v-for="pool in filteredPoolOptions" class="text-black py-2 px-3 cursor-pointer hover:bg-gray-300 capitalize" @click="setPickFromLength(pool)">{{ pool.name }}</li>
         </ul>
       </div>
     </div>
@@ -58,11 +68,10 @@
         <hr class="my-5 border border-teal-600 border-solid">
         <div class="text-white flex flex-row justify-between">
           <button class="flex-1 mr-3 px-3 py-2 bg-transparent border-solid border-white hover:border-teal-500 hover:text-teal-500 border rounded-sm text-white" type="button" name="button" @click="cancelAddPick">Back</button>
-          <!-- :class="{'opacity-50 cursor-default' : disableAddPick }"
-          :disabled="disableAddPick" -->
           <button
             @click="addPickToPool"
-            class="flex-1 px-3 py-2 bg-teal-600 border-teal-600 hover:border-teal-700 hover:bg-teal-700 border rounded-sm text-white" type="button" name="button">
+            :class="disableAddPick ? 'opacity-50 cursor-default' : 'hover:border-teal-700 hover:bg-teal-700'"
+            class="flex-1 px-3 py-2 bg-teal-600 border-teal-600 border rounded-sm text-white" type="button" name="button">
               Add
             </button>
         </div>
@@ -92,24 +101,11 @@
           v-else
           key="ticket"
           class="user-stack--make-pick text-center mb-3">
-          <span :class="pickableState" class="random flex justify-between items-center bg-indigo-600 rounded-t-sm border-bottom p-5" @click="makeRandomPick('pickPool')">
+          <span :class="pickableState" class="random flex justify-between items-center bg-indigo-600 rounded-t-sm border-bottom p-5" @click="makeRandomPick()">
             <i class="fas" :class="!userPicked ? 'fa-star' : 'fa-long-arrow-alt-down'"></i>
             {{!userPicked ? "What's the pick?" : pickedLabel}}
-            <i class="fas" :class="!userPicked ? 'fa-star' : 'fa-long-arrow-alt-down'"></i></span>
-          <div v-if="!userPicked" class="user-stack--lengths flex">
-            <div
-              :class="(shortPool.length > 0 && canPick) ? enablePickBtn : disablePickBtn"
-              @click="(shortPool.length > 0) ? makeRandomPick('shortPool') : null"
-              class="length--short bg-indigo-600 flex-1 py-3 text-sm rounded-bl-sm">
-                Short
-            </div>
-            <div
-              :class="(longPool.length > 0 && canPick) ? enablePickBtn : disablePickBtn"
-              @click="(longPool.length > 0) ? makeRandomPick('longPool') : null"
-              class="length--long bg-indigo-600 flex-1 py-3 text-sm rounded-br-sm">
-                Long
-            </div>
-          </div>
+            <i class="fas" :class="!userPicked ? 'fa-star' : 'fa-long-arrow-alt-down'"></i>
+          </span>
         </div>
       </template>
       <div v-if="displayPickPool" class="flex align-center my-3 relative">
@@ -215,7 +211,15 @@ export default {
         'Service',
       ],
       pickFromService: '',
-      pickFromServiceMenuOpen: false
+      pickFromServiceMenuIsOpen: false,
+      pickFromPool: { name: 'All', value: 'pickPool'},
+      pickFromPoolMenuIsOpen: false,
+      poolOptions: [
+        { name: 'All', value: 'pickPool'},
+        { name: 'short', value: 'shortPool'},
+        { name: 'long', value: 'longPool'},
+      ],
+      pendingSelectedMovie: {}
     }
   },
   computed: {
@@ -258,9 +262,6 @@ export default {
     disableAddPick() {
       return this.movieTitle == '' || this.duration == '' || this.selectedService == '';
     },
-    pendingSelectedMovie() {
-      return this[this.pickType].filter(pick => pick.service.name.includes(this.pickFromService))[this.randomSelection] || null;
-    },
     pickableState() {
       return (this.canPick && this.pickPool.length > 0) ? this.enablePickBtn :
         this.userPicked ? this.selectorsChoice : this.disablePickBtn
@@ -287,7 +288,10 @@ export default {
           availableService.push(pick.service.name)
         }
       })
-      return availableService;
+      return availableService.filter(pick => pick != this.pickFromService);
+    },
+    filteredPoolOptions() {
+      return this.poolOptions.filter(pool => pool.value != this.pickFromPool.value && this[pool.value].length > 0)
     }
   },
   methods: {
@@ -330,16 +334,16 @@ export default {
         });
       }
     },
-    makeRandomPick(type) {
-      this.pickType = type;
+    makeRandomPick() {
       if(this.canPick) {
         this.pendingPick = true;
         this.prevRandomSelection = this.randomSelection;
-        let temp = Math.floor(Math.random() * this[type].filter(pick => pick.service.name.includes(this.pickFromService)).length);
+        let temp = Math.floor(Math.random() * this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService)).length);
         while(temp === this.prevRandomSelection) {
-          temp = Math.floor(Math.random() * this[type].filter(pick => pick.service.name.includes(this.pickFromService)).length);
+          temp = Math.floor(Math.random() * this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService)).length);
         }
         this.randomSelection = temp;
+        this.pendingSelectedMovie = this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService))[temp] || null;
         this.$emit('update:reRolls', this.reRolls - 1)
         db.collection('users')
         .doc(this.username)
@@ -419,16 +423,23 @@ export default {
       return 0;
     },
     openPickFromServiceMenu() {
-      this.pickFromServiceMenuOpen = !this.pickFromServiceMenuOpen;
+      this.pickFromServiceMenuIsOpen = !this.pickFromServiceMenuIsOpen;
     },
     setPickFromService(service) {
       this.pickFromService = service;
+    },
+    openPickLengthMenu() {
+      this.pickFromPoolMenuIsOpen = !this.pickFromPoolMenuIsOpen;
+    },
+    setPickFromLength(pool) {
+      this.pickFromPool = pool;
     }
   },
   created() {
     window.document.addEventListener('click', () => {
       this.sortMenuIsOpen = false;
-      this.pickFromServiceMenuOpen = false;
+      this.pickFromServiceMenuIsOpen = false;
+      this.pickFromPoolMenuIsOpen = false;
     });
     if(this.userPicked) {
       if(this.$moment().valueOf() > this.$moment(this.userPickedDateTime).add(1, 'days').startOf('day').valueOf()) {
