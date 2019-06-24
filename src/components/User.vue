@@ -18,7 +18,7 @@
         <i class="fas mr-1" :class="addMode ? 'fa-times' : 'fa-plus-circle'"></i> {{ addMode ? '' : 'Add a pick'}}
       </p>
     </div>
-    <div v-if="signedIn && !displayPickPool && !addMode" class="flex align-center mb-3 relative flex-wrap">
+    <div v-if="signedIn && !displayPickPool && !addMode && canPick" class="flex align-center mb-3 relative flex-wrap">
       <hr class="border-t border-solid border-gray-600 mb-4 w-full">
       <div class="relative mr-4">
         <button type="button" name="button" class="text-white text-sm" :class="'hover:text-teal-500'" @click.stop="openPickFromServiceMenu()">
