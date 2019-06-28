@@ -5,6 +5,6 @@
       <router-link to="/about">About</router-link>
     </div> -->
     <router-view/>
-    <a href="https://github.com/michaelt437/movie-nights-roulette" class="text-teal text-lg self-center"><i class="fab fa-github" title="Careful, it's a flerken..."></i></a>
+    <a href="https://github.com/michaelt437/movie-nights-roulette" class="text-teal text-lg self-center"><i class="fab fa-github" title="Careful, it's a flarken..."></i></a>
   </div>
 </template>
