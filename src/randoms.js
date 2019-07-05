@@ -1,4 +1,4 @@
-const random = {
+let random = {
   names: [
     "Steve Rogers",
     "Bucky",
@@ -180,4 +180,5 @@ const random = {
   ]
 }
 
+export let streamingServices = random.streamingService;
 export default random;

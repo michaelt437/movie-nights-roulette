@@ -125,17 +125,12 @@
           </ul>
         </div>
       </div>
-      <div
-        v-for="movie in (displayPickPool ? pickPool : picks)"
-        class="user-stack--entry bg-gray-800 rounded-r-sm px-5 py-3 mb-3">
-          <p class="text-xl capitalize" :title="movie.title">{{ movie.title }}</p>
-          <p class="capitalize my-3" :class="movie.service.value">{{ movie.service.name }}</p>
-          <div class="flex justify-between items-center">
-            <p class="text-xs">{{ movie.duration }} minutes</p>
-            <i v-if="displayPickPool" class="far fa-trash-alt text-red-600 text-xs cursor-pointer" title="Trash it" @click="rmPick(movie)"></i>
-            <p v-else class="text-xs">{{ $moment(movie.watchDate).format('MMM D, YYYY') }}</p>
-          </div>
-      </div>
+      <pick-card
+      v-for="movie in (displayPickPool ? pickPool : picks)"
+      :key="`${movie.title}-card`"
+      :username="username"
+      :movie="movie"
+      :displayPickPool="displayPickPool" />
       <div v-if="displayPickPool && pickPool.length == 0" class="opacity-50 bg-transparent border-2 border-white border-dashed rounded-sm px-5 py-3 text-center">
         No Results
       </div>
@@ -151,8 +146,12 @@
 <script>
 import { db, fb } from '../db'
 import randoms from '../randoms'
+import PickCard from './PickCard'
 export default {
   name: 'user-stack',
+  components: {
+    PickCard
+  },
   props: {
     username: {
       type: String
@@ -181,6 +180,7 @@ export default {
     return {
       allUserMovies: [],
       addMode: false,
+      editMode: false,
       pendingPick: false,
       placeholderMovies: randoms.placeholderMovies,
       streamingService: randoms.streamingService,
@@ -453,6 +453,8 @@ export default {
           this.allUserMovies.push(change.doc.data())
         }
         if(change.type === 'modified') {
+          let index = this.allUserMovies.findIndex(pick => pick.title == change.doc.data().title);
+          this.allUserMovies[index] = change.doc.data();
           // this.allUserMovies = this.allUserMovies.filter(movie => movie.title !== change.doc.data().title)
         }
         if(change.type === 'removed') {
