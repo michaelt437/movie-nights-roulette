@@ -34,7 +34,7 @@
         <template v-if="displayPickPool">
           <i v-if="editMode" class="fas fa-times text-xs cursor-pointer" title="Cancel edit" @click="toggleEditMode"></i>
           <i class="text-teal-500 text-xs cursor-pointer ml-2" :class="editMode ? 'fas fa-check' : 'far fa-edit'" title="Edit details" @click="editMode ? updatePick() : toggleEditMode()"></i>
-          <i v-if="!editMode" class="far fa-trash-alt text-red-600 text-xs cursor-pointer ml-2" title="Trash it" @click="$emit('removePick', currMovie.title)"></i>
+          <i v-if="!editMode" class="far fa-trash-alt text-red-600 text-xs cursor-pointer ml-2" title="Trash it" @click="$emit('removePick', movie)"></i>
         </template>
         <p v-else class="text-xs">{{ $moment(currMovie.watchDate).format('MMM D, YYYY') }}</p>
       </div>
@@ -59,7 +59,7 @@ export default {
   },
   data() {
     return {
-      currMovie: this.movie,
+      currMovie: JSON.parse(JSON.stringify(this.movie)),
       editMode: false,
       updateDetails: {
         title: undefined,
@@ -77,26 +77,21 @@ export default {
     updatePick() {
       this.editMode = true;
       if(this.currMovie.title == this.updateDetails.title) {
-        console.log('titles match')
         db.collection(this.username)
         .doc(this.currMovie.title)
         .update({
-          title: this.updateDetails.title,
-          service: this.updateDetails.service,
-          duration: this.updateDetails.duration
-        });
-      }else{
-        console.log('titles do not match')
-        db.collection(this.username)
-        .doc(this.updateDetails.title)
-        .set({
-          title: this.updateDetails.title,
           service: this.updateDetails.service,
           duration: this.updateDetails.duration
         })
         .then(() => {
-          console.log('this movie title now, ', this.movie)
+          this.currMovie.service = this.updateDetails.service;
+          this.currMovie.duration = this.updateDetails.duration;
         });
+      }else{
+        this.$emit('pushPendingUpdates', this.movie, this.updateDetails)
+        this.currMovie.title = this.updateDetails.title;
+        this.currMovie.service = this.updateDetails.service;
+        this.currMovie.duration = this.updateDetails.duration;
       }
       this.editMode = false;
     },
@@ -111,10 +106,19 @@ export default {
       this.updateDetails.title = this.currMovie.title;
       this.updateDetails.service = this.currMovie.service;
       this.updateDetails.duration = this.currMovie.duration;
+    },
+    setService(service) {
+      this.updateDetails.service = service;
+      this.serviceMenuIsOpen = false;
     }
   },
   mounted() {
     this.setUpdateDetails();
+  },
+  created() {
+    window.addEventListener('click', () => {
+      this.serviceMenuIsOpen = false;
+    })
   }
 }
 </script>

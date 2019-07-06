@@ -130,7 +130,9 @@
       :key="`${movie.title}-card`"
       :username="username"
       :movie="movie"
-      :displayPickPool="displayPickPool" />
+      :displayPickPool="displayPickPool"
+      @pushPendingUpdates="pushPendingUpdates"
+      @removePick="rmPick" />
       <div v-if="displayPickPool && pickPool.length == 0" class="opacity-50 bg-transparent border-2 border-white border-dashed rounded-sm px-5 py-3 text-center">
         No Results
       </div>
@@ -219,7 +221,9 @@ export default {
         { name: 'short', value: 'shortPool'},
         { name: 'long', value: 'longPool'},
       ],
-      pendingSelectedMovie: {}
+      pendingSelectedMovie: {},
+      pendingAdditions: [],
+      pendingRemovals: []
     }
   },
   computed: {
@@ -391,7 +395,7 @@ export default {
       this.pickFromService = '';
     },
     rmPick(pick) {
-      const confirm = window.confirm("Are you sure you want to remove this pick?");
+      const confirm = window.confirm(`Are you sure you want to remove ${pick.title}?`);
       if(confirm) {
         db.collection(this.username)
         .doc(pick.title)
@@ -412,6 +416,7 @@ export default {
       this.pickPoolFilter = '';
       this.pickPoolSort = '';
       this.pickFromService = '';
+      this.runUpdatesForEdits();
     },
     sortPicks(a, b) {
       if(a > b) {
@@ -433,6 +438,29 @@ export default {
     },
     setPickFromLength(pool) {
       this.pickFromPool = pool;
+    },
+    pushPendingUpdates(toRm, toAdd) {
+      this.pendingRemovals.push(toRm);
+      this.pendingAdditions.push(toAdd);
+    },
+    runUpdatesForEdits() {
+      this.pendingRemovals.forEach(pick => {
+        db.collection(this.username)
+        .doc(pick.title)
+        .delete()
+      });
+      this.pendingAdditions.forEach(pick => {
+        db.collection(this.username)
+        .doc(pick.title)
+        .set({
+          title: pick.title,
+          service: pick.service,
+          duration: pick.duration,
+          watched: false
+        })
+      });
+      this.pendingRemovals = [];
+      this.pendingAdditions = [];
     }
   },
   created() {
