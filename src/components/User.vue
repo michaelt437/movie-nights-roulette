@@ -228,8 +228,7 @@ export default {
         { name: 'short', value: 'shortPool'},
         { name: 'long', value: 'longPool'},
       ],
-      pendingSelectedMovie: {},
-      excludedPicks: []
+      pendingSelectedMovie: {}
     }
   },
   computed: {
@@ -349,20 +348,16 @@ export default {
     makeRandomPick() {
       if(this.canPick) {
         this.pendingPick = true;
-        this.prevRandomSelection = this.randomSelection;
-        let temp = Math.floor(Math.random() * this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService)).length);
-        let excludeCheck = this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService))[temp].exclude;
-        console.log('exclude check', excludeCheck)
-        while(temp === this.prevRandomSelection && excludeCheck) {
-          temp = Math.floor(Math.random() * this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService)).length);
-          excludeCheck = this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService))[temp].exclude;
-          console.log('did this for when exclude check is true')
-        }
-        this.randomSelection = temp;
-        this.pendingSelectedMovie = this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService))[this.randomSelection] || null;
-        if(this.pendingSelectedMovie.exclude) {
-          this.makeRandomPick();
-        }
+        do {
+          if(!this.pendingSelectedMovie.exclude) this.prevRandomSelection = this.randomSelection;
+          let temp = Math.floor(Math.random() * this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService)).length);
+          while(temp === this.prevRandomSelection) {
+            temp = Math.floor(Math.random() * this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService)).length);
+          }
+          this.randomSelection = temp;
+          this.pendingSelectedMovie = this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService))[this.randomSelection] || null;
+          if(this.pendingSelectedMovie.exclude) console.log('twas true', this.pendingSelectedMovie.exclude)
+        } while(this.pendingSelectedMovie.exclude)
         this.$emit('update:reRolls', this.reRolls - 1)
         db.collection('users')
         .doc(this.username)
@@ -410,7 +405,7 @@ export default {
       this.pickFromService = '';
     },
     rmPick(pick) {
-      const confirm = window.confirm("Are you sure you want to remove this pick?");
+      const confirm = window.confirm(`Are you sure you want to remove ${pick.title}?`);
       if(confirm) {
         db.collection(this.username)
         .doc(pick.title)
@@ -460,7 +455,6 @@ export default {
         exclude: !movie.exclude
       })
       movie.exclude = !movie.exclude;
-      console.log('movie', movie, movie.exclude)
     }
   },
   created() {
@@ -486,7 +480,7 @@ export default {
           // this.allUserMovies[index] = change.doc.data();
         }
         if(change.type === 'removed') {
-          console.log('something was deleted!', change.doc.data())
+          // console.log('something was deleted!', change.doc.data())
           this.allUserMovies = this.allUserMovies.filter(movie => movie.title !== change.doc.data().title)
         }
       })
