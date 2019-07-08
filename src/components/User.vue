@@ -126,9 +126,18 @@
         </div>
       </div>
       <div
-        v-for="movie in (displayPickPool ? pickPool : picks)"
-        class="user-stack--entry bg-gray-800 rounded-r-sm px-5 py-3 mb-3">
-          <p class="text-xl capitalize" :title="movie.title">{{ movie.title }}</p>
+        v-for="(movie, index) in (displayPickPool ? pickPool : picks)"
+        class="user-stack--entry bg-gray-800 rounded-r-sm px-5 py-3 mb-3"
+        :class="{ 'opacity-25' : movie.exclude }">
+          <div class="flex justify-between items-center">
+            <p class="text-xl capitalize" :title="movie.title">{{ movie.title }}</p>
+            <i
+            v-if="displayPickPool"
+            class="text-sm text-gray-400 ml-3 cursor-pointer"
+            :class="movie.exclude ? 'far fa-square' : 'fas fa-check-square'"
+            @click="toggleExclusion(movie)"
+            ></i>
+          </div>
           <p class="capitalize my-3" :class="movie.service.value">{{ movie.service.name }}</p>
           <div class="flex justify-between items-center">
             <p class="text-xs">{{ movie.duration }} minutes</p>
@@ -232,7 +241,9 @@ export default {
       return this.allUserMovies.map(pick => pick.title.toLowerCase())
     },
     pickPool() {
-      return this.allUserMovies.filter(pick => !pick.watched).filter(pick => {
+      return this.allUserMovies
+      .filter(pick => !pick.watched)
+      .filter(pick => {
         return pick.title.toLowerCase().includes(this.pickPoolFilter) ||
           pick.service.name.toLowerCase().includes(this.pickPoolFilter)
       })
@@ -337,13 +348,16 @@ export default {
     makeRandomPick() {
       if(this.canPick) {
         this.pendingPick = true;
-        this.prevRandomSelection = this.randomSelection;
-        let temp = Math.floor(Math.random() * this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService)).length);
-        while(temp === this.prevRandomSelection) {
-          temp = Math.floor(Math.random() * this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService)).length);
-        }
-        this.randomSelection = temp;
-        this.pendingSelectedMovie = this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService))[temp] || null;
+        do {
+          if(!this.pendingSelectedMovie.exclude) this.prevRandomSelection = this.randomSelection;
+          let temp = Math.floor(Math.random() * this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService)).length);
+          while(temp === this.prevRandomSelection) {
+            temp = Math.floor(Math.random() * this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService)).length);
+          }
+          this.randomSelection = temp;
+          this.pendingSelectedMovie = this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService))[this.randomSelection] || null;
+          if(this.pendingSelectedMovie.exclude) console.log('twas true', this.pendingSelectedMovie.exclude)
+        } while(this.pendingSelectedMovie.exclude)
         this.$emit('update:reRolls', this.reRolls - 1)
         db.collection('users')
         .doc(this.username)
@@ -391,7 +405,7 @@ export default {
       this.pickFromService = '';
     },
     rmPick(pick) {
-      const confirm = window.confirm("Are you sure you want to remove this pick?");
+      const confirm = window.confirm(`Are you sure you want to remove ${pick.title}?`);
       if(confirm) {
         db.collection(this.username)
         .doc(pick.title)
@@ -433,6 +447,14 @@ export default {
     },
     setPickFromLength(pool) {
       this.pickFromPool = pool;
+    },
+    toggleExclusion(movie) {
+      db.collection(this.username)
+      .doc(movie.title)
+      .update({
+        exclude: !movie.exclude
+      })
+      movie.exclude = !movie.exclude;
     }
   },
   created() {
@@ -454,9 +476,11 @@ export default {
         }
         if(change.type === 'modified') {
           // this.allUserMovies = this.allUserMovies.filter(movie => movie.title !== change.doc.data().title)
+          // let index = this.allUserMovies.findIndex(movie => movie.title == change.doc.data().title)
+          // this.allUserMovies[index] = change.doc.data();
         }
         if(change.type === 'removed') {
-          console.log('something was deleted!', change.doc.data())
+          // console.log('something was deleted!', change.doc.data())
           this.allUserMovies = this.allUserMovies.filter(movie => movie.title !== change.doc.data().title)
         }
       })
