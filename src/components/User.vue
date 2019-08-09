@@ -398,6 +398,24 @@ export default {
         setTimeout(() => {
           this.hidePickActions = true;
         }, 900)
+      })
+      .then(() => {
+        let xhr = new XMLHttpRequest();
+        let msg = JSON.stringify({
+          "text": `:celebrate: Tonight's Pick! :celebrate:`,
+          "icon_emoji": ":niccage:",
+          "attachments": [
+            {
+              "fallback": `${this.pendingSelectedMovie.title} - ${this.pendingSelectedMovie.service.name} - ${this.pendingSelectedMovie.duration} mins`,
+              "author_name": `${this.username}`,
+              "title": `${this.pendingSelectedMovie.title.toUpperCase()}`,
+              "text": `${this.pendingSelectedMovie.service.name}\n_${this.pendingSelectedMovie.duration} mins_`
+            }
+          ]
+        })
+
+        xhr.open("POST", "https://hooks.slack.com/services/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")
+        xhr.send(msg)
       });
     },
     showPickPool() {
