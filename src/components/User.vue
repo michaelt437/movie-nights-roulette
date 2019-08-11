@@ -119,7 +119,7 @@
           </button>
           <ul
             v-show="sortMenuIsOpen"
-            class="list-reset bg-white rounded-sm absolute right-0 py-1 mt-2 w-32">
+            class="list-reset bg-white rounded-sm absolute right-0 py-1 mt-2 w-32 z-10">
             <li v-if="pickPoolSort != ''" class="text-black py-2 px-3 cursor-pointer hover:bg-gray-300" @click="setSort('')">Unset</li>
             <li v-for="sortBy in sortFields" class="text-black py-2 px-3 cursor-pointer hover:bg-gray-300" @click="setSort(sortBy)">{{ sortBy }}</li>
           </ul>
