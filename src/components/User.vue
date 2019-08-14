@@ -414,7 +414,7 @@ export default {
           ]
         })
 
-        xhr.open("POST", "https://hooks.slack.com/services/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")
+        xhr.open("POST", process.env.VUE_APP_MOVIE_NIGHTS_WEBHOOK)
         xhr.send(msg)
       });
     },
