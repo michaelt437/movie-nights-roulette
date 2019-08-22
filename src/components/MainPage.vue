@@ -31,6 +31,7 @@
         :signedIn="signedIn"
         :authorizeActions="user.email == userEmail"
         :reRolls.sync="user.reRolls"
+        :rollInitiated="user.rollInitiated"
         ></User>
       </template>
       <AddUser v-if="signedIn && !userExists"></AddUser>
@@ -108,10 +109,13 @@ export default {
       resolve('done!')
     });
 
+    let resetTime = this.$moment(this.lastPicker.pickedDateTime).add(1, 'days').hours(10).valueOf();
+
     init.then((value) => {
       setTimeout(() => {
         if(!this.canPick){
-          if((new this.$moment().valueOf()) > this.$moment(this.lastPicker.pickedDateTime).add(1, 'days').hours(10).valueOf()) {
+          if((new this.$moment().valueOf()) > resetTime) {
+            console.log('this moment in time, is great that today 8:23 pm')
             db.collection('users')
             .doc(this.lastPicker.name)
             .update({
@@ -122,7 +126,14 @@ export default {
           }
         }
         this.usersArr.forEach(user => {
-          if(user.reRolls < 4){
+          if(user.rollInitiated && (this.$moment().valueOf() > resetTime)) {
+            db.collection('users')
+            .doc(user.name)
+            .update({
+              rollInitiated: false
+            })
+          }
+          if(user.reRolls < 4 && !user.rollInitiated){
             db.collection('users')
             .doc(user.name)
             .update({

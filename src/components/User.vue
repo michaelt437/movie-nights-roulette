@@ -362,7 +362,8 @@ export default {
         db.collection('users')
         .doc(this.username)
         .update({
-          reRolls: fb.firestore.FieldValue.increment(-1)
+          reRolls: fb.firestore.FieldValue.increment(-1),
+          rollInitiated: true
         })
         if(this.reRolls == 1) {
           this.confirmPick();
