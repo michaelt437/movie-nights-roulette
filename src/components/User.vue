@@ -184,6 +184,9 @@ export default {
     },
     reRolls: {
       type: Number,
+    },
+    rollInitiated: {
+      type: Boolean
     }
   },
   data() {
@@ -359,12 +362,23 @@ export default {
           if(this.pendingSelectedMovie.exclude) console.log('twas true', this.pendingSelectedMovie.exclude)
         } while(this.pendingSelectedMovie.exclude)
         this.$emit('update:reRolls', this.reRolls - 1)
+
         db.collection('users')
         .doc(this.username)
         .update({
           reRolls: fb.firestore.FieldValue.increment(-1),
-          rollInitiated: true
         })
+
+        if(!this.rollInitiated) {
+          this.$emit('update:rollInitiated', true)
+          db.collection('users')
+          .doc(this.username)
+          .update({
+            rollInitiated: true,
+            rollInitTime: Date.parse(new Date())
+          })
+        }
+
         if(this.reRolls == 1) {
           this.confirmPick();
         }

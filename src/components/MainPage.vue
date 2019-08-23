@@ -109,12 +109,10 @@ export default {
       resolve('done!')
     });
 
-    let resetTime = this.$moment(this.lastPicker.pickedDateTime).add(1, 'days').hours(10).valueOf();
-
     init.then((value) => {
       setTimeout(() => {
         if(!this.canPick){
-          if((new this.$moment().valueOf()) > resetTime) {
+          if((new this.$moment().valueOf()) > this.$moment(this.lastPicker.pickedDateTime).add(1, 'days').hours(10).valueOf()) {
             console.log('this moment in time, is great that today 8:23 pm')
             db.collection('users')
             .doc(this.lastPicker.name)
@@ -126,7 +124,7 @@ export default {
           }
         }
         this.usersArr.forEach(user => {
-          if(user.rollInitiated && (this.$moment().valueOf() > resetTime)) {
+          if(user.rollInitiated && (this.$moment().valueOf() > this.$moment(user.rollInitTime).add(1, 'days').hours(6).valueOf())) {
             db.collection('users')
             .doc(user.name)
             .update({
