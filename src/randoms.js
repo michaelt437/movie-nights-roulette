@@ -160,6 +160,10 @@ const random = {
     { name: "Criterion Collection",
       value: "critcol"
     },
+    {
+      name: "IMDB",
+      value: "imdb"
+    },
     { name: "Tubi",
       value: "tubi"
     },
