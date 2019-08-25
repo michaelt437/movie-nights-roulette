@@ -268,10 +268,10 @@ export default {
       })
     },
     shortPool() {
-      return this.pickPool.filter(pick => pick.duration < 106 && pick.service.name.includes(this.pickFromService))
+      return this.pickPool.filter(pick => pick.duration < 107 && pick.service.name.includes(this.pickFromService))
     },
     longPool() {
-      return this.pickPool.filter(pick => pick.duration >= 106 && pick.service.name.includes(this.pickFromService))
+      return this.pickPool.filter(pick => pick.duration >= 107 && pick.service.name.includes(this.pickFromService))
     },
     disableAddPick() {
       return this.movieTitle == '' || this.duration == '' || this.selectedService == '';
