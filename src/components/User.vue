@@ -92,7 +92,7 @@
             </div>
           </div>
           <div class="mb-3 flex items-center justify-end" v-show="!hidePickActions">
-            <button v-if="allUserMovies.length > 1 && reRolls > 0" class="text-sm bg-transparent rounded-full p-2" :class="reRollColor" title="Re-roll" type="button" name="button" @click="makeRandomPick('pickPool')"><i class="fas fa-dice"></i> ({{reRolls}})</button>
+            <button v-if="allUserMovies.length > 1 && reRolls > 0" class="text-sm bg-transparent rounded-full p-2" :class="reRollColor" title="Re-roll" type="button" name="button" @click="makeRandomPick"><i class="fas fa-dice"></i> ({{reRolls}})</button>
             <button class="text-sm bg-transparent rounded-full text-white p-2" title="Hmm, nah..." type="button" name="button" @click="cancelMakePick"><i class="fas fa-times"></i></button>
             <button class="text-sm bg-transparent rounded-full text-teal-500 p-2" title="Yes!" type="button" name="button" @click="confirmPick"><i class="fas" :class="canPick ? 'fa-check' : 'fa-thumbs-up'"></i></button>
           </div>
@@ -101,7 +101,7 @@
           v-else
           key="ticket"
           class="user-stack--make-pick text-center mb-3">
-          <span :class="pickableState" class="random flex justify-between items-center bg-indigo-600 rounded-t-sm border-bottom p-5" @click="makeRandomPick()">
+          <span :class="pickableState" class="random flex justify-between items-center bg-indigo-600 rounded-t-sm border-bottom p-5" @click="makeRandomPick">
             <i class="fas" :class="!userPicked ? 'fa-star' : 'fa-long-arrow-alt-down'"></i>
             {{!userPicked ? "What's the pick?" : pickedLabel}}
             <i class="fas" :class="!userPicked ? 'fa-star' : 'fa-long-arrow-alt-down'"></i>
@@ -230,6 +230,7 @@ export default {
         { name: 'All', value: 'pickPool'},
         { name: 'short', value: 'shortPool'},
         { name: 'long', value: 'longPool'},
+        { name: 'real long', value: 'realLongPool'},
       ],
       pendingSelectedMovie: {}
     }
@@ -268,10 +269,13 @@ export default {
       })
     },
     shortPool() {
-      return this.pickPool.filter(pick => pick.duration < 107 && pick.service.name.includes(this.pickFromService))
+      return this.pickPool.filter(pick => pick.duration < 107 && pick.service.name.includes(this.pickFromService) && !pick.exclude)
     },
     longPool() {
-      return this.pickPool.filter(pick => pick.duration >= 107 && pick.service.name.includes(this.pickFromService))
+      return this.pickPool.filter(pick => (pick.duration < 135 && pick.duration >= 107) && pick.service.name.includes(this.pickFromService) && !pick.exclude)
+    },
+    realLongPool() {
+      return this.pickPool.filter(pick => pick.duration >= 135 && pick.service.name.includes(this.pickFromService) && !pick.exclude)
     },
     disableAddPick() {
       return this.movieTitle == '' || this.duration == '' || this.selectedService == '';
@@ -351,16 +355,15 @@ export default {
     makeRandomPick() {
       if(this.canPick) {
         this.pendingPick = true;
-        do {
-          if(!this.pendingSelectedMovie.exclude) this.prevRandomSelection = this.randomSelection;
-          let temp = Math.floor(Math.random() * this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService)).length);
-          while(temp === this.prevRandomSelection) {
-            temp = Math.floor(Math.random() * this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService)).length);
-          }
-          this.randomSelection = temp;
-          this.pendingSelectedMovie = this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService))[this.randomSelection] || null;
-          if(this.pendingSelectedMovie.exclude) console.log('twas true', this.pendingSelectedMovie.exclude)
-        } while(this.pendingSelectedMovie.exclude)
+        this.prevRandomSelection = this.randomSelection
+        let temp = Math.floor(Math.random() * this[this.pickFromPool.value].length);
+        if(this.prevRandomSelection == temp) { console.log('these are the same', temp, this.prevRandomSelection) }
+        while(temp === this.prevRandomSelection && this[this.pickFromPool.value].length > 1) {
+          temp = Math.floor(Math.random() * this[this.pickFromPool.value].length);
+        }
+        this.randomSelection = temp;
+        this.pendingSelectedMovie = this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService))[this.randomSelection] || null;
+
         this.$emit('update:reRolls', this.reRolls - 1)
 
         db.collection('users')
