@@ -362,7 +362,8 @@ export default {
           temp = Math.floor(Math.random() * this[this.pickFromPool.value].length);
         }
         this.randomSelection = temp;
-        this.pendingSelectedMovie = this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService))[this.randomSelection] || null;
+        // redundant check for exclude, need to fix
+        this.pendingSelectedMovie = this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService) && !pick.exclude)[this.randomSelection] || null;
 
         this.$emit('update:reRolls', this.reRolls - 1)
 
