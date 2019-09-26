@@ -268,13 +268,16 @@ export default {
         }
       })
     },
-    shortPool() {
+    pickPoolFiltered() {
+      return this.pickPool.filter(pick => pick.service.name.includes(this.pickFromService) && !pick.exclude)
+    },
+    shortPoolFiltered() {
       return this.pickPool.filter(pick => pick.duration < 107 && pick.service.name.includes(this.pickFromService) && !pick.exclude)
     },
-    longPool() {
+    longPoolFiltered() {
       return this.pickPool.filter(pick => (pick.duration < 135 && pick.duration >= 107) && pick.service.name.includes(this.pickFromService) && !pick.exclude)
     },
-    realLongPool() {
+    realLongPoolFiltered() {
       return this.pickPool.filter(pick => pick.duration >= 135 && pick.service.name.includes(this.pickFromService) && !pick.exclude)
     },
     disableAddPick() {
@@ -302,14 +305,16 @@ export default {
     availableService() {
       let availableService = [];
       this.pickPool.forEach(pick => {
-        if(!availableService.includes(pick.service.name)){
-          availableService.push(pick.service.name)
+        if(!pick.exclude) {
+          if(!availableService.includes(pick.service.name)){
+            availableService.push(pick.service.name)
+          }
         }
       })
       return availableService.filter(pick => pick != this.pickFromService);
     },
     filteredPoolOptions() {
-      return this.poolOptions.filter(pool => pool.value != this.pickFromPool.value && this[pool.value].length > 0)
+      return this.poolOptions.filter(pool => pool.value != this.pickFromPool.value && this[`${pool.value}Filtered`].length > 0)
     }
   },
   methods: {
@@ -356,14 +361,14 @@ export default {
       if(this.canPick) {
         this.pendingPick = true;
         this.prevRandomSelection = this.randomSelection
-        let temp = Math.floor(Math.random() * this[this.pickFromPool.value].length);
+        let temp = Math.floor(Math.random() * this[`${this.pickFromPool.value}Filtered`].length);
         if(this.prevRandomSelection == temp) { console.log('these are the same', temp, this.prevRandomSelection) }
-        while(temp === this.prevRandomSelection && this[this.pickFromPool.value].length > 1) {
-          temp = Math.floor(Math.random() * this[this.pickFromPool.value].length);
+        while(temp === this.prevRandomSelection && this[`${this.pickFromPool.value}Filtered`].length > 1) {
+          temp = Math.floor(Math.random() * this[`${this.pickFromPool.value}Filtered`].length);
         }
         this.randomSelection = temp;
         // redundant check for exclude, need to fix
-        this.pendingSelectedMovie = this[this.pickFromPool.value].filter(pick => pick.service.name.includes(this.pickFromService) && !pick.exclude)[this.randomSelection] || null;
+        this.pendingSelectedMovie = this[`${this.pickFromPool.value}Filtered`].filter(pick => pick.service.name.includes(this.pickFromService) && !pick.exclude)[this.randomSelection] || null;
 
         this.$emit('update:reRolls', this.reRolls - 1)
 
