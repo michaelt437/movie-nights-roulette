@@ -90,7 +90,7 @@ const random = {
     'The Fast and the Furious',
     '2 Fast 2 Furious',
     'Fast 6',
-    'Drug Wars',
+    'Drug War',
     'Fast 7',
     'Alien: Resurrection',
     'Terminator: Genisys',
@@ -150,6 +150,10 @@ const random = {
     },
     { name: "Vudu",
       value: "vudu"
+    },
+    {
+      name: 'Disney+',
+      value: 'disney'
     },
     { name: "HBO",
       value: "hbo"

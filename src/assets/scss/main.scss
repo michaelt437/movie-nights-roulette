@@ -103,6 +103,12 @@ h1 {
   color: #6CB2EB;
 }
 
+.disney {
+  background: -webkit-linear-gradient(left, rgba(16, 16, 92, 1) 0%, rgba(0,255,244,1) 30%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .vudu {
   color: #2779BD;
 }
