@@ -491,12 +491,12 @@ export default {
       this.pickFromPool = pool;
     },
     toggleExclusion(movie) {
-      db.collection(this.username)
-      .doc(movie.title)
-      .update({
-        exclude: !movie.exclude
-      })
       movie.exclude = !movie.exclude;
+      // db.collection(this.username)
+      // .doc(movie.title)
+      // .update({
+      //   exclude: movie.exclude
+      // })
     }
   },
   created() {
