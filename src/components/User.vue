@@ -127,6 +127,7 @@
       </div>
       <div
         v-for="(movie, index) in (displayPickPool ? pickPool : picks)"
+        :key="movie.title"
         class="user-stack--entry bg-gray-800 rounded-r-sm px-5 py-3 mb-3"
         :class="{ 'opacity-25' : movie.exclude }">
           <div class="flex justify-between items-center">
@@ -498,18 +499,23 @@ export default {
     setPickFromLength(pool) {
       this.pickFromPool = pool;
     },
-    toggleExclusion(movie) {
-      return new Promise((resolve, reject) => {
+    async toggleExclusion(movie) {
+
+      const toggleState = new Promise(resolve => {
         movie.exclude = !movie.exclude;
-        resolve();
+        setTimeout(function() {
+          console.log(`${movie.title} - ${movie.exclude}`)
+          resolve(`${movie} - ${movie.exclude}`);
+        }, 2000)
       })
-      .then(() => {
-        db.collection(this.username)
-        .doc(movie.title)
-        .update({
-          exclude: movie.exclude
-        })
-      })
+
+      const toggleAction = await toggleState;
+
+      db.collection(this.username)
+      .doc(movie.title)
+      .update({
+        exclude: movie.exclude
+      });
     }
   },
   created() {
