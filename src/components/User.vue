@@ -504,7 +504,6 @@ export default {
       const toggleState = new Promise(resolve => {
         movie.exclude = !movie.exclude;
         setTimeout(function() {
-          console.log(`${movie.title} - ${movie.exclude}`)
           resolve(`${movie} - ${movie.exclude}`);
         }, 2000)
       })
