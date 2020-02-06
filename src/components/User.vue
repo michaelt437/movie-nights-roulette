@@ -37,7 +37,7 @@
         </button>
         <ul
           v-show="pickFromPoolMenuIsOpen"
-          class="list-reset bg-white rounded-sm absolute left-0 py-1 mt-2 w-32 z-10">
+          class="list-reset bg-white rounded-sm absolute left-0 py-1 mt-2 w-40 z-10">
           <li v-for="pool in filteredPoolOptions" class="text-black py-2 px-3 cursor-pointer hover:bg-gray-300 capitalize" @click="setPickFromLength(pool)">{{ pool.name }}</li>
         </ul>
       </div>
@@ -127,6 +127,7 @@
       </div>
       <div
         v-for="(movie, index) in (displayPickPool ? pickPool : picks)"
+        :key="movie.title"
         class="user-stack--entry bg-gray-800 rounded-r-sm px-5 py-3 mb-3"
         :class="{ 'opacity-25' : movie.exclude }">
           <div class="flex justify-between items-center">
@@ -229,7 +230,9 @@ export default {
       poolOptions: [
         { name: 'All', value: 'pickPool'},
         { name: 'short', value: 'shortPool'},
+        { name: 'short + long', value: 'shortAndLongPool'},
         { name: 'long', value: 'longPool'},
+        { name: 'long + real long', value: 'longAndRealLongPool'},
         { name: 'real long', value: 'realLongPool'},
       ],
       pendingSelectedMovie: {}
@@ -274,8 +277,14 @@ export default {
     shortPoolFiltered() {
       return this.pickPool.filter(pick => pick.duration < 107 && pick.service.name.includes(this.pickFromService) && !pick.exclude)
     },
+    shortAndLongPoolFiltered() {
+      return this.pickPool.filter(pick => pick.duration < 135 && pick.service.name.includes(this.pickFromService) && !pick.exclude)
+    },
     longPoolFiltered() {
       return this.pickPool.filter(pick => (pick.duration < 135 && pick.duration >= 107) && pick.service.name.includes(this.pickFromService) && !pick.exclude)
+    },
+    longAndRealLongPoolFiltered() {
+      return this.pickPool.filter(pick => pick.duration < 135 && pick.service.name.includes(this.pickFromService) && !pick.exclude)
     },
     realLongPoolFiltered() {
       return this.pickPool.filter(pick => pick.duration >= 135 && pick.service.name.includes(this.pickFromService) && !pick.exclude)
@@ -367,7 +376,7 @@ export default {
           temp = Math.floor(Math.random() * this[`${this.pickFromPool.value}Filtered`].length);
         }
         this.randomSelection = temp;
-        // redundant check for exclude, need to fix
+        // TODO redundant check for exclude, need to fix
         this.pendingSelectedMovie = this[`${this.pickFromPool.value}Filtered`].filter(pick => pick.service.name.includes(this.pickFromService) && !pick.exclude)[this.randomSelection] || null;
 
         this.$emit('update:reRolls', this.reRolls - 1)
@@ -490,13 +499,22 @@ export default {
     setPickFromLength(pool) {
       this.pickFromPool = pool;
     },
-    toggleExclusion(movie) {
+    async toggleExclusion(movie) {
+
+      const toggleState = new Promise(resolve => {
+        movie.exclude = !movie.exclude;
+        setTimeout(function() {
+          resolve(`${movie} - ${movie.exclude}`);
+        }, 2000)
+      })
+
+      const toggleAction = await toggleState;
+
       db.collection(this.username)
       .doc(movie.title)
       .update({
-        exclude: !movie.exclude
-      })
-      movie.exclude = !movie.exclude;
+        exclude: movie.exclude
+      });
     }
   },
   created() {
