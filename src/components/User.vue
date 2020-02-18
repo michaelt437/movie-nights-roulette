@@ -284,7 +284,7 @@ export default {
       return this.pickPool.filter(pick => (pick.duration < 135 && pick.duration >= 107) && pick.service.name.includes(this.pickFromService) && !pick.exclude)
     },
     longAndRealLongPoolFiltered() {
-      return this.pickPool.filter(pick => pick.duration < 135 && pick.service.name.includes(this.pickFromService) && !pick.exclude)
+      return this.pickPool.filter(pick => pick.duration > 135 && pick.service.name.includes(this.pickFromService) && !pick.exclude)
     },
     realLongPoolFiltered() {
       return this.pickPool.filter(pick => pick.duration >= 135 && pick.service.name.includes(this.pickFromService) && !pick.exclude)
